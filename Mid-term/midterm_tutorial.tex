@@ -1,0 +1,796 @@
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs}
+\usepackage{listings}
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\scriptsize,
+    breaklines=true,
+    columns=fullflexible,
+    showstringspaces=false,
+    frame=single
+}
+\usetheme{Boadilla}
+\useoutertheme{miniframes}
+\setbeamertemplate{navigation symbols}{}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\wrong}[1]{\textcolor{red}{#1}}
+
+\title{MATH4907 Midterm Test Review}
+\author{Sanyang Liu}
+\date{November 2026}
+
+\AtBeginSection[]
+{
+    \begin{frame}{Table of Contents}
+        \tableofcontents[currentsection,hideallsubsections]
+    \end{frame}
+}
+
+\begin{document}
+\maketitle
+
+\section{Question 1: Concepts}
+
+\begin{frame}{Q1(1): Arbitrage}
+\small
+\textbf{Select all correct answers.} Which statements about arbitrage
+and the no-arbitrage principle are correct?
+\begin{enumerate}
+\item[A.] An arbitrage strategy may have non-positive initial value.
+\item[B.] An arbitrage strategy has zero probability of loss at some future time.
+\item[\wrong{C.}] \wrong{An arbitrage strategy must guarantee strictly positive profit in every state.}
+\item[D.] If two portfolios have the same terminal payoff almost surely,
+then they should have the same initial value under no-arbitrage.
+\item[E.] No-arbitrage is one of the fundamental principles used to price
+contingent claims.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(1): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} A zero-cost strategy can be an arbitrage;
+a negative initial cost may also be possible.
+\item \textbf{B. True.} An arbitrage has no chance of a terminal loss.
+\item \wrong{\textbf{C. False.} Positive profit is required with positive
+probability, not in every state.}
+\item \textbf{D. True.} Different initial prices for the same payoff
+would create a buy-low, sell-high arbitrage.
+\item \textbf{E. True.} No-arbitrage links claim prices to replicating
+portfolios and risk-neutral valuation.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(2): Black--Scholes Model}
+\small
+\textbf{Select all correct answers.} In the Black--Scholes model,
+which statements are correct?
+\begin{enumerate}
+\item[A.] The underlying asset follows
+$\dd S_t=\mu S_t\,\dd t+\sigma S_t\,\dd W_t$.
+\item[B.] $W_t$ denotes a Wiener process.
+\item[C.] The derivative value is written as $V_t=V(t,S_t)$.
+\item[\wrong{D.}] \wrong{The volatility parameter is usually denoted by $r$.}
+\item[E.] The risk-free bond grows as $B_t=B_0e^{rt}$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(2): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} The stock is modeled by geometric Brownian motion.
+\item \textbf{B. True.} $W_t$ supplies the Brownian randomness.
+\item \textbf{C. True.} In a Markov model, the claim price depends on
+current time and stock price.
+\item \wrong{\textbf{D. False.} Volatility is $\sigma$; $r$ is the
+risk-free interest rate.}
+\item \textbf{E. True.} Constant continuously compounded interest
+gives $B_t=B_0e^{rt}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(3): Binomial Tree}
+\small
+\textbf{Select all correct answers.} Which statements about the
+binomial tree model are correct?
+\begin{enumerate}
+\item[A.] In one time step, the stock can move to $uS_i$ or $dS_i$.
+\item[B.] The no-arbitrage condition is $d<e^{r\Delta t}<u$.
+\item[C.] The risk-neutral probability is
+$q=(e^{r\Delta t}-d)/(u-d)$.
+\item[\wrong{D.}] \wrong{The real-world probability $p$ must be used
+directly for derivative pricing.}
+\item[E.] The derivative value can be computed by backward induction.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(3): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} The two branches are the defining stock moves.
+\item \textbf{B. True.} The bond growth factor must lie strictly
+between $d$ and $u$ to rule out arbitrage.
+\item \textbf{C. True.} Solving
+$e^{r\Delta t}=qu+(1-q)d$ gives this $q$.
+\item \wrong{\textbf{D. False.} Pricing uses the risk-neutral
+probability $q$; the real-world $p$ can differ.}
+\item \textbf{E. True.} Start from terminal payoffs and discount
+backward one step at a time.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(4): Trinomial Tree}
+\small
+\textbf{Select all correct answers.} Which statements about the
+trinomial tree model are correct?
+\begin{enumerate}
+\item[A.] The stock price may move up, down, or remain unchanged.
+\item[B.] In log-price form,
+$x_{i+1}\in\{x_i+\Delta x,x_i,x_i-\Delta x\}$.
+\item[C.] The probabilities are often denoted by $p_u,p_0,p_d$.
+\item[D.] The probabilities satisfy $p_u+p_0+p_d=1$.
+\item[\wrong{E.}] \wrong{The trinomial tree is stable for every choice
+of $\Delta x$.}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(4): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} A trinomial step has three possible branches.
+\item \textbf{B. True.} Equally spaced log-price nodes give these moves.
+\item \textbf{C. True.} The subscripts indicate up, middle, and down.
+\item \textbf{D. True.} The probabilities must sum to one; they must
+also be nonnegative.
+\item \wrong{\textbf{E. False.} Grid spacing affects the transition
+weights. Some choices make a weight negative or the scheme unstable.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(5): Finite Difference Stencil}
+\small
+\textbf{Select all correct answers.} Which finite difference
+formulas and error claims are correct?
+\begin{enumerate}
+\item[A.] Forward difference:
+$f'(x)\approx[f(x+h)-f(x)]/h$.
+\item[B.] Centered first derivative:
+$f'(x)\approx[f(x+h)-f(x-h)]/(2h)$.
+\item[C.] Centered second derivative:
+$f''(x)\approx[f(x-h)-2f(x)+f(x+h)]/h^2$.
+\item[\wrong{D.}] \wrong{The forward difference has error $O(h^2)$.}
+\item[E.] The centered first derivative has error $O(h^2)$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(5): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} Taylor expansion gives
+$[f(x+h)-f(x)]/h=f'(x)+O(h)$.
+\item \textbf{B. True.} Subtract the Taylor expansions at
+$x+h$ and $x-h$.
+\item \textbf{C. True.} Add those expansions and subtract $2f(x)$.
+\item \wrong{\textbf{D. False.} The forward difference is generally
+first order, $O(h)$.}
+\item \textbf{E. True.} Odd cancellation removes the $O(h)$ term,
+leaving $O(h^2)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(6): Explicit Heat Scheme}
+\small
+For $u_\tau=u_{xx}$ with $\lambda=k/h^2$, \textbf{select all
+correct answers} about the explicit scheme.
+\begin{enumerate}
+\item[A.] The next time level is computed directly from the current level.
+\item[B.] One matrix form is
+$u^{j+1}=(I-\lambda B)u^j+\lambda c^j$.
+\item[\wrong{C.}] \wrong{A matrix equation must be solved at every
+time step.}
+\item[D.] The usual stability condition is $0<\lambda\leq1/2$.
+\item[E.] Too large a $\lambda$ may make the numerical solution unstable.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(6): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} All right-hand values are already known.
+\item \textbf{B. True.} With $B$ the tridiagonal negative-Laplacian
+matrix, this is the explicit update; $c^j$ encodes boundaries.
+\item \wrong{\textbf{C. False.} Explicit stepping is a matrix-vector
+multiplication, not a linear solve.}
+\item \textbf{D. True.} For the standard one-dimensional heat
+equation, $\lambda\leq1/2$ controls the highest-frequency mode.
+\item \textbf{E. True.} Beyond the stable range, errors can grow
+rapidly during time stepping.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(7): Implicit Heat Scheme}
+\small
+\textbf{Select all correct answers.} Which statements about the
+implicit finite difference scheme are correct?
+\begin{enumerate}
+\item[A.] It may require solving a linear system at each time step.
+\item[B.] For the heat equation, one form is
+$(I+\lambda B)u^j=u^{j-1}+\lambda c^j$.
+\item[C.] Unknown new-level values appear in the equation.
+\item[D.] $I+\lambda B$ is strictly diagonally dominant for $\lambda>0$.
+\item[\wrong{E.}] \wrong{The implicit scheme is always identical
+to the explicit scheme.}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(7): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} The new vector occurs inside a matrix system.
+\item \textbf{B. True.} This is backward Euler for the heat
+equation with boundary terms.
+\item \textbf{C. True.} This is the reason the step is called implicit.
+\item \textbf{D. True.} The diagonal is $1+2\lambda$, greater than
+the sum $2\lambda$ of neighboring magnitudes.
+\item \wrong{\textbf{E. False.} The two schemes evaluate spatial
+differences at different time levels.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(8): Consistency, Stability, Convergence}
+\small
+\textbf{Select all correct answers.}
+\begin{enumerate}
+\item[A.] Consistency means the scheme approximates the PDE locally
+as the grid is refined.
+\item[B.] Stability means numerical errors do not grow uncontrollably.
+\item[C.] Convergence means the numerical solution approaches the exact
+solution as $\Delta x,\Delta t\to0$.
+\item[D.] The Lax equivalence theorem relates these notions for
+suitable linear problems.
+\item[\wrong{E.}] \wrong{A consistent scheme is always convergent,
+even if it is unstable.}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(8): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} Substituting the exact solution leaves a
+local residual that tends to zero.
+\item \textbf{B. True.} Stability bounds the propagation of
+perturbations over a fixed time interval.
+\item \textbf{C. True.} Convergence concerns the global solution error.
+\item \textbf{D. True.} For a well-posed linear problem, consistency
+and stability are equivalent to convergence.
+\item \wrong{\textbf{E. False.} A small local error can be amplified
+without bound by an unstable scheme.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(9): Lattices and Finite Differences}
+\small
+\textbf{Select all correct answers.}
+\begin{enumerate}
+\item[A.] Tree models can be interpreted as particular explicit
+finite difference schemes.
+\item[B.] A trinomial tree may arise from discretizing the
+transformed Black--Scholes equation.
+\item[C.] If $h^2=k\sigma^2$, then $p_0=0$, giving a binomial tree.
+\item[D.] $p_u,p_0,p_d$ must be nonnegative to be probabilities.
+\item[\wrong{E.}] \wrong{Lattice methods and finite difference methods
+are completely unrelated.}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(9): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} Explicit updates combine values at neighboring
+nodes, as trees do.
+\item \textbf{B. True.} A centered space and forward time discretization
+can produce three neighboring weights.
+\item \textbf{C. True.} In that discretization,
+$p_0=1-k\sigma^2/h^2=0$ when $h^2=k\sigma^2$.
+\item \textbf{D. True.} Negative weights cannot represent
+transition probabilities.
+\item \wrong{\textbf{E. False.} The transition weights can be
+exactly the finite difference update coefficients.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(10): Fourier Stability Analysis}
+\small
+\textbf{Select all correct answers.}
+\begin{enumerate}
+\item[A.] Fourier analysis can study stability of constant-coefficient
+finite difference schemes.
+\item[B.] The amplification factor describes how a Fourier mode
+evolves between time levels.
+\item[C.] For the explicit heat scheme,
+$g(\xi)=1-4\lambda\sin^2(\xi/2)$.
+\item[D.] High-frequency errors must not grow uncontrollably.
+\item[\wrong{E.}] \wrong{The explicit heat scheme is stable for all
+$\lambda>0$.}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(10): Why?}
+\small
+\begin{itemize}
+\item \textbf{A. True.} Fourier modes diagonalize constant-coefficient
+difference operators.
+\item \textbf{B. True.} A mode is multiplied by $g(\xi)$ at each step.
+\item \textbf{C. True.} Substitute $e^{\mathrm{i}i\xi}$ into the
+explicit heat update.
+\item \textbf{D. True.} The largest amplification often occurs near
+the highest frequency.
+\item \wrong{\textbf{E. False.} For the standard heat scheme,
+$\lambda>1/2$ makes some modes grow.}
+\end{itemize}
+\end{frame}
+
+\section{Question 2: CRR Tree}
+
+\begin{frame}{Q2: Problem}
+\small
+Consider a European call option with strike price $K$ and expiry $T$.
+The underlying stock follows geometric Brownian motion:
+\[
+\dd S_t=\mu S_t\,\dd t+\sigma S_t\,\dd W_t.
+\]
+Let the risk-neutral interest rate be $r$. Given
+\[
+S_0=K=100,\qquad r=0.05,\qquad \sigma=0.15,\qquad T=1,
+\]
+use a \textbf{two-step CRR binomial tree} to price the call.
+\begin{enumerate}
+\item[(a)] Compute the up factor $u$ and down factor $d$. \hfill (5 points)
+\item[(b)] Compute the risk-neutral probability $p$. \hfill (5 points)
+\item[(c)] Compute the value of the European call option. \hfill (5 points)
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q2(a): Up and Down Factors}
+The inputs are
+\[
+S_0=K=100,\qquad r=0.05,\qquad \sigma=0.15,
+\qquad T=1,\qquad N=2.
+\]
+The time step is $\Delta t=T/N=0.5$.
+
+\begin{block}{CRR factors}
+\[
+u=e^{\sigma\sqrt{\Delta t}}\approx1.111895,
+\qquad
+d=e^{-\sigma\sqrt{\Delta t}}\approx0.899365,
+\qquad ud=1.
+\]
+\end{block}
+
+Check $d<e^{r\Delta t}<u$ before calculating the
+risk-neutral probability.
+\end{frame}
+
+\begin{frame}{Q2(b): Risk-Neutral Probability}
+The discounted stock price must have the same value before and after
+one step:
+\[
+S=e^{-r\Delta t}\bigl(p\,uS+(1-p)dS\bigr).
+\]
+Solving for $p$ gives
+\[
+p=\frac{e^{r\Delta t}-d}{u-d}
+=\frac{e^{0.025}-0.899365}{1.111895-0.899365}
+\approx \boxed{0.592621}.
+\]
+
+This $p$ is denoted by $q$ in Tutorial 1.
+The drift $\mu$ in the stock SDE does not enter the
+no-arbitrage price of this option.
+\end{frame}
+
+\begin{frame}{Q2(c): Terminal Payoffs}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Path & Terminal stock price & Call payoff $(S_T-K)^+$\\
+\midrule
+$uu$ & $100u^2\approx123.6311$ & $23.6311$\\
+$ud=du$ & $100ud=100$ & $0$\\
+$dd$ & $100d^2\approx80.8858$ & $0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.5cm}
+Only the $uu$ path finishes in the money.
+The middle node recombines because $ud=du=1$.
+\end{frame}
+
+\begin{frame}{Q2(c): Backward Induction}
+At the upper node after one step,
+\[
+C_u=e^{-r\Delta t}\bigl(pC_{uu}+(1-p)C_{ud}\bigr)
+=e^{-0.025}p(23.6311).
+\]
+At the lower node, $C_d=0$. Discount one more step:
+\[
+\begin{aligned}
+C_0
+&=e^{-r\Delta t}\bigl(pC_u+(1-p)C_d\bigr)\\
+&=e^{-rT}p^2(23.6311)
+\approx\boxed{7.8945}.
+\end{aligned}
+\]
+Keep unrounded $u,d,p$ until the final numerical answer.
+\end{frame}
+
+\section{Question 3: Explicit Scheme}
+
+\begin{frame}{Q3: Problem (1/2)}
+\small
+Consider the initial boundary value problem
+\[
+\begin{cases}
+u_t-2u_{xx}+u=0, &(x,t)\in(0,1)\times(0,\infty),\\
+u(x,0)=\phi_0(x), &x\in(0,1),\\
+u(0,t)=u(1,t)=0, &t>0.
+\end{cases}
+\]
+Find a numerical solution on $[0,1]\times[0,T]$ for fixed $T>0$.
+For $m,n\in\mathbb N$, set
+\[
+k=\frac{T}{m},\qquad h=\frac{1}{n+1},\qquad
+x_i=ih,\qquad t_j=jk.
+\]
+Approximate $u_t(x_i,t_j)$ by a forward difference and
+$u_{xx}(x_i,t_j)$ by a centered difference.
+\end{frame}
+
+\begin{frame}{Q3: Problem (2/2)}
+\small
+Let $v_{i,j}$ approximate $u(x_i,t_j)$. Answer the following:
+\begin{enumerate}
+\item[(a)] Write the finite difference scheme in terms of $v_{i,j}$.
+\item[(b)] Find its amplification factor. Show stability with respect to
+$\norm{\cdot}_{2,\Delta x}$, stating the condition if stability is
+conditional.
+\item[(c)] \begin{enumerate}
+\item[(i)] Show consistency with the PDE in $\norm{\cdot}_\infty$,
+stating the assumptions on the exact solution.
+\item[(ii)] Write the scheme in matrix form and determine whether
+it converges in $\norm{\cdot}_\infty$.
+\end{enumerate}
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q3(a): Derive the Update}
+Set $\lambda=k/h^2$. The zero boundary values are
+$v_{0,j}=v_{n+1,j}=0$.
+Insert the two difference formulas into the PDE:
+\[
+\frac{v_{i,j+1}-v_{i,j}}{k}
+-2\frac{v_{i-1,j}-2v_{i,j}+v_{i+1,j}}{h^2}
++v_{i,j}=0.
+\]
+Solving for the next time level gives
+\[
+\boxed{
+v_{i,j+1}
+=2\lambda v_{i-1,j}
++(1-k-4\lambda)v_{i,j}
++2\lambda v_{i+1,j}.}
+\]
+The three weights sum to $1-k$; the reaction term $+u$ in
+the PDE accounts for the loss of $k$.
+\end{frame}
+
+\begin{frame}{Q3(b): Amplification Factor}
+Test one Fourier mode $v_{i,j}=\widehat v_j e^{\mathrm{i}i\xi}$.
+The shifts multiply it by $e^{-\mathrm{i}\xi}$ and
+$e^{\mathrm{i}\xi}$. Hence
+\[
+\begin{aligned}
+g(\xi)
+&=2\lambda e^{-\mathrm{i}\xi}
+ +(1-k-4\lambda)+2\lambda e^{\mathrm{i}\xi}\\
+&=1-k-4\lambda(1-\cos\xi)\\
+&=\boxed{1-k-8\lambda\sin^2(\xi/2)}.
+\end{aligned}
+\]
+
+For the finite interval with zero Dirichlet boundaries, the sine
+modes have $\xi_\ell=\ell\pi/(n+1)$.
+\end{frame}
+
+\begin{frame}{Q3(b): The von Neumann Condition}
+For stability over a fixed time interval, seek a constant $C$
+independent of $h,k$ and $\xi$ such that
+\[
+|g(\xi)|\leq 1+Ck
+\quad\text{for all admissible mesh sizes.}
+\]
+
+First control the diffusion part. Since
+$0\leq\sin^2(\xi/2)\leq1$,
+\[
+-1\leq1-8\lambda\sin^2(\xi/2)\leq1
+\quad\text{if}\quad \lambda\leq\frac14.
+\]
+Then
+\[
+|g(\xi)|
+\leq\left|1-8\lambda\sin^2(\xi/2)\right|+k
+\leq1+k.
+\]
+Thus $C=1$ works when $k/h^2\leq1/4$.
+\end{frame}
+
+\begin{frame}{Q3(b): Why $1+k$ Is Enough}
+If $m$ steps reach time $T=mk$, then
+\[
+\norm{\bm v^{m}}_{2,h}
+\leq (1+k)^m\norm{\bm v^0}_{2,h}
+\leq e^T\norm{\bm v^0}_{2,h}.
+\]
+The constant $e^T$ stays bounded as the mesh is refined.
+
+\begin{block}{Conditional stability}
+The condition $k/h^2\leq1/4$ restricts the admissible meshes.
+The explicit scheme is not unconditionally stable.
+\end{block}
+
+The stronger requirement $|g(\xi)|\leq1$ for every step gives
+$k+8\lambda\leq2$. It is sufficient but is not needed for
+the fixed-time stability argument above.
+\end{frame}
+
+\begin{frame}{Q3(c)(i): Local Truncation Error}
+Insert the exact solution sampled on the grid into the difference
+equation. At an interior point,
+\[
+\begin{aligned}
+\tau_{i,j}
+={}&\frac{u(x_i,t_j+k)-u(x_i,t_j)}{k}\\
+&-2\frac{u(x_i-h,t_j)-2u(x_i,t_j)+u(x_i+h,t_j)}{h^2}
+ +u(x_i,t_j).
+\end{aligned}
+\]
+Taylor expansion gives
+\[
+\frac{u(t+k)-u(t)}{k}=u_t+O(k),
+\]
+\[
+\frac{u(x-h)-2u(x)+u(x+h)}{h^2}
+=u_{xx}+O(h^2).
+\]
+Because $u_t-2u_{xx}+u=0$, the leading PDE terms cancel.
+\end{frame}
+
+\begin{frame}{Q3(c)(i): Consistency in $\norm{\cdot}_\infty$}
+If $u_{tt}$ and $u_{xxxx}$ are bounded on
+$[0,1]\times[0,T]$, Taylor's theorem gives
+\[
+|\tau_{i,j}|
+\leq \frac{k}{2}\norm{u_{tt}}_\infty
+ +\frac{h^2}{6}\norm{u_{xxxx}}_\infty.
+\]
+Consequently,
+\[
+\boxed{\norm{\bm\tau^j}_\infty=O(k+h^2)\longrightarrow0.}
+\]
+
+The scheme is first order in time and second order in space.
+The smoothness assumption is needed to make this bound uniform
+over all grid points.
+\end{frame}
+
+\begin{frame}{Q3(c)(ii): Matrix Form}
+Collect the $n$ interior values in
+$\bm v^j=(v_{1,j},\ldots,v_{n,j})^\top$. The zero boundary
+values give
+\[
+\bm v^{j+1}=A\bm v^j,
+\qquad
+A=\begin{pmatrix}
+1-k-4\lambda & 2\lambda & & \\
+2\lambda & 1-k-4\lambda & \ddots & \\
+ & \ddots & \ddots & 2\lambda\\
+ & & 2\lambda & 1-k-4\lambda
+\end{pmatrix}.
+\]
+The diagonal coefficient contains both diffusion and reaction.
+The off-diagonal coefficient is $2\lambda$ on each side.
+\end{frame}
+
+\begin{frame}{Q3(c)(ii): A Simple $\ell^\infty$ Condition}
+To bound $\norm{A}_\infty$, make every entry of $A$
+nonnegative. The only condition to check is
+\[
+1-k-4\lambda\geq0
+\quad\Longleftrightarrow\quad
+\boxed{k\leq\frac{h^2}{4+h^2}}.
+\]
+Each interior row sum is then $1-k$; boundary-adjacent rows
+have a smaller sum. Hence
+\[
+\norm{A}_\infty\leq1-k<1,
+\qquad
+\norm{A^j}_\infty\leq1.
+\]
+This is a convenient \emph{sufficient} condition for stability
+in the maximum norm.
+\end{frame}
+
+\begin{frame}{Q3(c)(ii): Convergence and a Weaker Bound}
+The condition $\lambda\leq1/4$ from Q3(b) also gives
+\[
+\norm{A}_\infty
+\leq |1-k-4\lambda|+4\lambda
+\leq1+k,
+\qquad
+\norm{A^j}_\infty\leq e^{t_j}.
+\]
+If $\bm e^j$ is the grid error and the initial data are exact,
+then $\bm e^0=0$ and
+\[
+\bm e^{j+1}=A\bm e^j-k\bm\tau^j.
+\]
+Therefore, for $t_j\leq T$,
+\[
+\norm{\bm e^j}_\infty
+\leq T e^T\max_{\ell<j}\norm{\bm\tau^\ell}_\infty
+=O(k+h^2)\longrightarrow0.
+\]
+Either maximum-norm bound proves convergence together with
+the consistency estimate.
+\end{frame}
+
+\begin{frame}{Q3: Three Conditions to Keep Separate}
+\begin{center}
+\begin{tabular}{p{0.48\textwidth}p{0.40\textwidth}}
+\toprule
+Condition & What it supplies\\
+\midrule
+$\displaystyle k/h^2\leq1/4$ & A convenient von Neumann bound
+$|g|\leq1+k$; also $\norm{A}_\infty\leq1+k$.\\[0.25cm]
+$\displaystyle k\leq h^2/(4+h^2)$ & Nonnegative matrix entries and
+$\norm{A}_\infty\leq1-k$.\\[0.25cm]
+$\displaystyle k+8k/h^2\leq2$ & The stronger one-step bound
+$|g|\leq1$ for the Fourier symbol.\\
+\bottomrule
+\end{tabular}
+\end{center}
+The second and third conditions are useful proof choices.
+The exam does not require the sharpest stability boundary.
+\end{frame}
+
+\section{Question 4: Numerical Price}
+
+\begin{frame}{Q4: Problem}
+\small
+The explicit finite difference demonstration, followed by linear
+interpolation, gives a European call price at $t=0$ of
+\$8.5889337. The Black--Scholes formula gives \$8.5916583,
+a percentage error of about $0.0317\%$.
+
+\medskip
+Your boss wants to reduce this error. Give \textbf{two suggestions
+with different origins}: one concerning the mathematical model and
+one concerning the computational model or script.
+
+\medskip
+Explain each suggestion and any tradeoff. No mathematical proof or
+programming is required. The demonstration script follows.
+\end{frame}
+
+\begin{frame}[fragile]{Q4: Demonstration 01 (1/2)}
+\begin{lstlisting}
+%Demonstration:
+%Using Matlab to Implement Explicit Finite Difference Scheme
+%to Price a European Call
+
+clear;
+
+%basic parameters
+S0=100; K=S0; r=0.05; sigma=0.15; T=1;
+n=25; % number of interior spatial points
+m=50; % number of temporal steps (no. of iterations)
+
+%computed constants
+Sr=S0*exp((r-sigma^2/2)*T+6*sigma*sqrt(T));
+h=Sr/(n+1); % spatial step size
+k=T/m; %temporal step size
+
+%define the vector b
+b=zeros(n,1);
+b(end)=0.5*(sigma^2*n^2+r*n)*Sr;
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Q4: Demonstration 01 (2/2)}
+\begin{lstlisting}
+%Define the iteration matrix G
+G=diag(-(sigma^2*(1:n)^2+r)); % G=A11
+G=G+diag(0.5*(sigma^2*(1:(n-1))+r).*(1:(n-1)),1); % G=A11+A12
+G=G+diag(0.5*(sigma^2*(2:n)-r).*(2:n),-1); % G=A11+A12+A21 (=A)
+G=eye(n,n)+k*G; % G=I+kA
+
+%Iteration
+v=max(h*(1:n)'-K,0) % initialize v, v=v0
+
+for j=1:m
+    v=G*v+k*b; % v_j=G*v_(j-1)+k*b
+end
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Q4: Where Can the Error Come From?}
+The demonstration reports
+\[
+C_{\mathrm{FD}}=8.5889337,
+\qquad C_{\mathrm{BS}}=8.5916583,
+\qquad\text{relative error}\approx0.0317\%.
+\]
+The script uses $n=25$ interior spatial points, $m=50$
+time steps, and a truncated stock-price domain $[0,S_r]$.
+
+\begin{block}{Two distinct sources}
+\begin{itemize}
+\item Discretization and interpolation: finite $h$ and $k$.
+\item Domain truncation: an artificial condition at $S=S_r$.
+\end{itemize}
+\end{block}
+The task asks for one suggestion from each source, with tradeoffs.
+\end{frame}
+
+\begin{frame}{Q4: Refine the Computational Grid}
+Increase $n$ to reduce spatial error and increase $m$ to reduce
+time error. Linear interpolation at $S_0$ can also improve as
+the spatial grid becomes finer.
+
+\begin{block}{Explicit-scheme tradeoff}
+If $h$ is roughly halved, keep $k/h^2$ within the stability
+range by reducing $k$ roughly fourfold. This increases the
+number of time steps and the computational cost.
+\end{block}
+
+Grid refinement should be checked by comparing prices on
+successively finer grids; a single close result may contain
+cancelling errors.
+\end{frame}
+
+\begin{frame}{Q4: Improve the Far-Field Boundary}
+The script uses a constant boundary value $V(S_r,\tau)=S_r$.
+For a European call, a better far-field approximation is
+\[
+\boxed{V(S_r,\tau)\approx S_r-Ke^{-r\tau}},
+\qquad \tau=T-t.
+\]
+At maturity, $\tau=0$, this becomes $S_r-K$.
+As the time-to-maturity grows, the strike is discounted.
+
+\begin{block}{Implementation tradeoff}
+The boundary contribution to the explicit update must now be
+recomputed at each time step. Moving $S_r$ farther away can
+also reduce boundary influence, but may require more spatial
+points to preserve resolution near $S_0$ and $K$.
+\end{block}
+\end{frame}
+
+
+\begin{frame}
+\vfill
+\begin{center}{\LARGE Thank You! Questions?}\end{center}
+\vfill
+\end{frame}
+
+\end{document}

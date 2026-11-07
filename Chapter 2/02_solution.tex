@@ -1,0 +1,583 @@
+\documentclass{article}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{minted}
+\usepackage{geometry}
+\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm}
+
+\newcommand{\xs}{x_S}
+\newcommand{\xt}{x_t}
+\newcommand{\taut}{\tau_t}
+
+
+\title{MATH4907 Assignment 2}
+\author{Sanyang Liu}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{Question 1}
+
+Suppose that \(r(s)\) and \(\sigma(s)>0\) are continuous
+functions of time to maturity \(s\). Use the transformation
+given in the lecture notes:
+\begin{equation*}
+    \begin{cases}
+        x(S,t)=\ln S+
+        \displaystyle\int_0^{T-t}
+        \left(r(z)-\frac12\sigma^2(z)\right)\,dz, \\[6pt]
+        \tau(t)=\displaystyle\frac12
+        \int_0^{T-t}\sigma^2(z)\,dz, \\[6pt]
+        V(S,t)=
+        \exp\left(-\displaystyle\int_0^{T-t}r(z)\,dz\right)
+        u(x,\tau).
+    \end{cases}
+\end{equation*}
+Define
+\[
+E(t):=\exp\left(-\int_0^{T-t}r(z)\,dz\right).
+\]
+Then
+\[
+V(S,t)=E(t)u\bigl(x(S,t),\tau(t)\bigr),
+\qquad E'(t)=r(T-t)E(t).
+\]
+With this time-to-maturity convention, the Black--Scholes
+equation in calendar time \(t\) is
+\[
+V_t+\frac12\sigma^2(T-t)S^2V_{SS}
++r(T-t)SV_S-r(T-t)V=0.
+\]
+From the definitions of \(x\) and \(\tau\), we compute
+\[
+\begin{cases}
+x_S=\dfrac1S, \\[6pt]
+x_{SS}=-\dfrac1{S^2}, \\[6pt]
+x_t=\dfrac12\sigma^2(T-t)-r(T-t), \\[6pt]
+\tau_t=-\dfrac12\sigma^2(T-t).
+\end{cases}
+\]
+Using the chain rule and \(V=Eu\), we obtain
+\[
+\begin{cases}
+V_S=E\,u_x x_S
+    =E\,\dfrac{u_x}{S}, \\[8pt]
+V_{SS}
+=E\left(u_{xx}x_S^2+u_xx_{SS}\right)
+=E\,\dfrac{u_{xx}-u_x}{S^2}, \\[8pt]
+V_t=E\left(u_xx_t+u_\tau\tau_t\right)+uE'(t)\\[4pt]
+\phantom{V_t}
+=E\left[
+u_x\left(\dfrac12\sigma^2(T-t)-r(T-t)\right)
+-\dfrac12\sigma^2(T-t)u_\tau
++r(T-t)u
+\right].
+\end{cases}
+\]
+Substituting these expressions into the Black--Scholes
+equation and dividing by \(E>0\), we get
+\[
+\begin{aligned}
+0={}&
+u_x\left(\frac12\sigma^2(T-t)-r(T-t)\right)
+-\frac12\sigma^2(T-t)u_\tau+r(T-t)u\\
+&+\frac12\sigma^2(T-t)(u_{xx}-u_x)
++r(T-t)u_x-r(T-t)u.
+\end{aligned}
+\]
+The \(u_x\) terms and the \(u\) terms cancel. Hence
+\[
+-\frac12\sigma^2(T-t)u_\tau
++\frac12\sigma^2(T-t)u_{xx}=0.
+\]
+Since \(\sigma(T-t)>0\), we conclude
+\[
+\boxed{u_\tau=u_{xx}}
+\]
+on the domain
+\[
+(x,\tau)\in\mathbb R\times
+\left[0,\frac12\int_0^T\sigma^2(z)\,dz\right].
+\]
+\qed
+\section*{Question 2}
+Let
+\[
+c_{-1}f(x-h)+c_0f(x)+c_1f(x+h)
+\]
+be the desired finite difference approximation. By Taylor expansion at \(x\),
+\begin{align*}
+f(x-h)&=f(x)-hf'(x)+\frac{h^2}{2}f''(x)-\frac{h^3}{6}f'''(x)+O(h^4),\\
+f(x+h)&=f(x)+hf'(x)+\frac{h^2}{2}f''(x)+\frac{h^3}{6}f'''(x)+O(h^4).
+\end{align*}
+Thus
+\begin{align*}
+&c_{-1}f(x-h)+c_0f(x)+c_1f(x+h)\\
+&=(c_{-1}+c_0+c_1)f(x)
++h(-c_{-1}+c_1)f'(x)\\
+&\quad+\frac{h^2}{2}(c_{-1}+c_1)f''(x)
++\frac{h^3}{6}(-c_{-1}+c_1)f'''(x)+O(h^4).
+\end{align*}
+To approximate \(h^2f''(x)\), we require the linear system
+\[
+\begin{cases}
+c_{-1}+c_0+c_1=0,\\[2pt]
+-c_{-1}+c_1=0,\\[2pt]
+\dfrac{1}{2}(c_{-1}+c_1)=1.
+\end{cases}
+\]
+In matrix form,
+\[
+\begin{pmatrix}
+1 & 1 & 1\\
+-1 & 0 & 1\\
+1 & 0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+c_{-1}\\ c_0\\ c_1
+\end{pmatrix}
+=
+\begin{pmatrix}
+0\\ 0\\ 2
+\end{pmatrix}.
+\]
+Solving gives
+\[
+(c_{-1},c_0,c_1)=(1,-2,1).
+\]
+Therefore,
+\[
+f''(x)=\frac{f(x-h)-2f(x)+f(x+h)}{h^2}+O(h^2).
+\]
+\qed
+
+\section*{Question 3}
+We seek coefficients \(c_{++},c_{+-},c_{-+},c_{--}\) such that
+\[
+\begin{aligned}
+S:=\;&c_{++}f(x+h,y+k)+c_{+-}f(x+h,y-k)\\
+&+c_{-+}f(x-h,y+k)+c_{--}f(x-h,y-k)
+\end{aligned}
+\]
+approximates \(4hk\,f_{xy}(x,y)\). Assume that \(f\) has
+continuous fourth-order partial derivatives near \((x,y)\).\\
+Following the hint, let \(a,b\in\{1,-1\}\). The bivariate Taylor
+expansion at \((x,y)\) up to third order is
+\[
+\begin{aligned}
+f(x+ah,y+bk)
+={}&f+ahf_x+bkf_y\\
+&+\frac12\bigl(h^2f_{xx}+2ab\,hkf_{xy}+k^2f_{yy}\bigr)\\
+&+\frac16\bigl(
+ah^3f_{xxx}+3b\,h^2kf_{xxy}
++3a\,hk^2f_{xyy}+bk^3f_{yyy}
+\bigr)+R_{ab}.
+\end{aligned}
+\]
+The four choices of \((a,b)\) give the expansions at the four
+points in \(S\). For the constant and first-order terms to
+vanish and the coefficient of \(hkf_{xy}\) to equal \(4\), we
+require
+\[
+\begin{cases}
+c_{++}+c_{+-}+c_{-+}+c_{--}=0,\\[2pt]
+c_{++}+c_{+-}-c_{-+}-c_{--}=0,\\[2pt]
+c_{++}-c_{+-}+c_{-+}-c_{--}=0,\\[2pt]
+c_{++}-c_{+-}-c_{-+}+c_{--}=4.
+\end{cases}
+\]
+Equivalently,
+\[
+\begin{pmatrix}
+1&1&1&1\\
+1&1&-1&-1\\
+1&-1&1&-1\\
+1&-1&-1&1
+\end{pmatrix}
+\begin{pmatrix}
+c_{++}\\c_{+-}\\c_{-+}\\c_{--}
+\end{pmatrix}
+=
+\begin{pmatrix}
+0\\0\\0\\4
+\end{pmatrix}.
+\]
+Solving gives
+\[
+(c_{++},c_{+-},c_{-+},c_{--})=(1,-1,-1,1).
+\]
+With these coefficients, the pure second-order terms and all
+third-order terms also cancel. Thus
+\[
+S=f(x+h,y+k)-f(x+h,y-k)
+  -f(x-h,y+k)+f(x-h,y-k).
+\]
+We now estimate the remainder. Define
+\[
+g(s):=f(x+h,s)-f(x-h,s).
+\]
+Then \(S=g(y+k)-g(y-k)\). The one-dimensional central Taylor
+expansion gives
+\[
+S=2k\,g'(y)+R_y,\qquad
+|R_y|\leq\frac{k^3}{3}
+\sup_{|s-y|\leq k}|g'''(s)|.
+\]
+Since
+\[
+g'''(s)=f_{yyy}(x+h,s)-f_{yyy}(x-h,s),
+\]
+the mean value theorem and boundedness of \(f_{xyyy}\) imply
+\(g'''(s)=O(h)\). Hence \(R_y=O(hk^3)\).\\
+Applying the central Taylor expansion in \(x\) to \(f_y\), with
+bounded \(f_{xxxy}\), gives
+\[
+g'(y)
+=f_y(x+h,y)-f_y(x-h,y)
+=2h f_{xy}(x,y)+O(h^3).
+\]
+Consequently,
+\[
+S=4hk\,f_{xy}(x,y)+O(h^3k+hk^3).
+\]
+Dividing by \(4hk\), we obtain
+\[
+\frac{S}{4hk}=f_{xy}(x,y)+O(h^2+k^2).
+\]
+Since \(O(h^2+k^2)\) implies \(O(h^2+k^2+hk)\), this proves
+the stated formula:
+\[
+\boxed{
+f_{xy}(x,y)=
+\frac{
+f(x+h,y+k)-f(x+h,y-k)
+-f(x-h,y+k)+f(x-h,y-k)
+}{4hk}
++O(h^2+k^2+hk).
+}
+\]
+\qed
+\section*{Question 4}
+\subsection*{(a)}
+
+Let
+\[
+\widetilde{\mathbf u}_j
+=(u_{0,j},u_{1,j},\ldots,u_{n,j},u_{n+1,j})^T,
+\qquad \lambda=\frac{k}{h^2}.
+\]
+Following the sign convention for \(B\) in the lecture notes, define
+the augmented matrix
+\[
+\widetilde B=
+\begin{pmatrix}
+0&0&0&&&\\
+-1&2&-1&&&\\
+&-1&2&-1&&\\
+&&\ddots&\ddots&\ddots&\\
+&&&-1&2&-1\\
+&&&&0&0
+\end{pmatrix}
+\in\mathbb R^{(n+2)\times(n+2)}.
+\]
+Its first and last rows are zero, while each interior row satisfies
+\[
+(\widetilde B\widetilde{\mathbf u}_j)_i
+=-u_{i-1,j}+2u_{i,j}-u_{i+1,j},
+\qquad i=1,\ldots,n.
+\]
+At each interior point, the explicit scheme is
+\[
+u_{i,j+1}
+=u_{i,j}
++\lambda(u_{i-1,j}-2u_{i,j}+u_{i+1,j}),
+\qquad i=1,\ldots,n.
+\]
+The implicit scheme is
+\[
+u_{i,j+1}
+=u_{i,j}
++\lambda(u_{i-1,j+1}-2u_{i,j+1}+u_{i+1,j+1}),
+\qquad i=1,\ldots,n.
+\]
+The endpoint values are
+\[
+u_{0,j}=\phi_l(\tau_j),\qquad
+u_{n+1,j}=\phi_r(\tau_j).
+\]
+Taking \(\theta=\frac12\) in the theta scheme gives
+\[
+\begin{aligned}
+u_{i,j+1}-u_{i,j}
+={}&\frac{\lambda}{2}
+ \bigl(u_{i-1,j}-2u_{i,j}+u_{i+1,j}\bigr)\\
+&+\frac{\lambda}{2}
+ \bigl(u_{i-1,j+1}-2u_{i,j+1}+u_{i+1,j+1}\bigr),
+\qquad i=1,\ldots,n.
+\end{aligned}
+\]
+Including the endpoints, its matrix form is
+\[
+\boxed{
+\left(I+\frac{\lambda}{2}\widetilde B\right)
+\widetilde{\mathbf u}_{j+1}
+=
+\left(I-\frac{\lambda}{2}\widetilde B\right)
+\widetilde{\mathbf u}_{j}
++\mathbf g_j,
+}
+\]
+where
+\[
+\mathbf g_j=
+\begin{pmatrix}
+\phi_l(\tau_{j+1})-\phi_l(\tau_j)\\
+0\\
+\vdots\\
+0\\
+\phi_r(\tau_{j+1})-\phi_r(\tau_j)
+\end{pmatrix}.
+\]
+The first and last rows of this matrix equation update the endpoint
+values to \(\phi_l(\tau_{j+1})\) and \(\phi_r(\tau_{j+1})\), respectively.
+
+\subsection*{(b)}
+
+Fix \(i\) and \(j\), and write \(x=x_i\) and \(\tau=\tau_j\).
+In the definition of \(\eta_{i,j}\), replace
+\(v_{i\pm1,j}=u(x\pm h,\tau)\) and
+\(v_{i\pm1,j+1}=u(x\pm h,\tau+k)\). Since
+\(\lambda=k/h^2\), we have
+\[
+\begin{aligned}
+\eta_{i,j}
+={}&u(x,\tau+k)-u(x,\tau)\\
+&-\frac{k}{2h^2}
+ \Bigl[
+ u(x-h,\tau+k)-2u(x,\tau+k)+u(x+h,\tau+k)\\
+&\hspace{35mm}
+ +u(x-h,\tau)-2u(x,\tau)+u(x+h,\tau)
+ \Bigr].
+\end{aligned}
+\]
+All derivatives below are evaluated at \((x,\tau)\), unless their
+arguments are displayed. Taylor expansion in time gives
+\[
+u(x,\tau+k)-u(x,\tau)
+=ku_\tau+\frac{k^2}{2}u_{\tau\tau}+O(k^3).
+\]
+Taylor expansion of the two spatial neighbours about \(x\) gives
+\[
+u(x-h,\tau)-2u(x,\tau)+u(x+h,\tau)
+=h^2u_{xx}+O(h^4).
+\]
+Applying the same spatial expansion at time \(\tau+k\), then expanding
+\(u_{xx}(x,\tau+k)\) about \(\tau\), gives
+\[
+\begin{aligned}
+&u(x-h,\tau+k)-2u(x,\tau+k)+u(x+h,\tau+k)\\
+&\qquad=h^2u_{xx}(x,\tau+k)+O(h^4)\\
+&\qquad=h^2u_{xx}+kh^2u_{xx\tau}
+          +O(k^2h^2+h^4).
+\end{aligned}
+\]
+Thus all the quantities \(u(x\pm h,\tau)\) and \(u(x\pm h,\tau+k)\)
+have been expanded about the fixed point \((x_i,\tau_j)\).
+Substituting the expansions into \(\eta_{i,j}\) yields
+\[
+\begin{aligned}
+\eta_{i,j}
+&=ku_\tau+\frac{k^2}{2}u_{\tau\tau}
+ -\frac{k}{2h^2}
+  \left(2h^2u_{xx}+kh^2u_{xx\tau}\right)
+ +O(k^3+kh^2)\\
+&=k(u_\tau-u_{xx})
+ +\frac{k^2}{2}(u_{\tau\tau}-u_{xx\tau})
+ +O(k^3+kh^2).
+\end{aligned}
+\]
+The heat equation implies \(u_\tau=u_{xx}\), and differentiating
+it with respect to \(\tau\) gives
+\(u_{\tau\tau}=u_{xx\tau}\). Hence the displayed leading terms
+cancel, and
+\[
+|\eta_{i,j}|\le C(kh^2+k^3).
+\]
+By Young's inequality with conjugate exponents
+\(p=3/2\) and \(q=3\) (i.e., $\frac{1}{p}+\frac{1}{q}=1$),
+\[
+kh^2
+\le \frac{(h^2)^{3/2}}{3/2}+\frac{k^3}{3}
+=\frac23h^3+\frac13k^3.
+\]
+Consequently,
+\[
+|\eta_{i,j}|
+\le C\left(\frac23h^3+\frac43k^3\right)
+\le \frac{4C}{3}(h^3+k^3).
+\]
+Hence we take
+\[
+\boxed{\alpha=3,\qquad\beta=3.}
+\]
+
+\section*{Question 5}
+
+Let \(x=\ln S\) and \(\tau=T-t\). Write \(V(x,\tau)\) for the
+European call price. With
+\[
+S_0=K=100,\qquad r=0.05,\qquad \sigma=0.15,\qquad T=1,
+\]
+the pricing equation is
+\[
+V_\tau
+=\frac{\sigma^2}{2}V_{xx}
++\left(r-\frac{\sigma^2}{2}\right)V_x-rV.
+\]
+Define
+\[
+\nu:=r-\frac{\sigma^2}{2}=0.03875.
+\]
+The initial condition at \(\tau=0\) is the call payoff
+\[
+V(x,0)=(e^x-K)^+.
+\]
+
+\subsection*{(a)}
+
+Let \(x_i=x_{\min}+ih\), \(\tau_j=jk\), and
+\(V_{i,j}\approx V(x_i,\tau_j)\). Applying a forward difference
+in \(\tau\) and second-order central differences in \(x\) gives
+\[
+\frac{V_{i,j+1}-V_{i,j}}{k}
+=
+\frac{\sigma^2}{2}
+\frac{V_{i-1,j}-2V_{i,j}+V_{i+1,j}}{h^2}
++\nu\frac{V_{i+1,j}-V_{i-1,j}}{2h}
+-rV_{i,j}.
+\]
+Hence, at each interior point,
+\[
+\boxed{
+V_{i,j+1}
+=c_-V_{i-1,j}+c_0V_{i,j}+c_+V_{i+1,j},
+}
+\]
+where
+\[
+c_-=\frac{\sigma^2k}{2h^2}-\frac{\nu k}{2h},
+\qquad
+c_0=1-\frac{\sigma^2k}{h^2}-rk,
+\qquad
+c_+=\frac{\sigma^2k}{2h^2}+\frac{\nu k}{2h}.
+\]
+
+\subsection*{(b)}
+
+On the truncated interval \([-1,5]\), we use the usual
+low- and high-stock-price boundary approximations for a
+European call:
+\[
+\boxed{
+V(-1,\tau)=0,\qquad
+V(5,\tau)=e^5-Ke^{-r\tau}
+        =e^5-100e^{-0.05\tau},
+\quad 0\leq\tau\leq1.
+}
+\]
+The first boundary approximates the call value by zero when
+\(S=e^{-1}\) is small. The second uses the large-\(S\) behaviour
+\(V\approx S-Ke^{-r\tau}\).
+
+\subsection*{(c)}
+Use \(h=0.01\) and \(k=1/225\). Starting from
+\[
+V_{i,0}=(e^{x_i}-100)^+,
+\]
+apply the explicit update in part (a) for \(225\) time steps.
+The following Python code also uses linear interpolation to
+evaluate the result at \(x=\ln100\), which is not a grid point. See the code in the Appendix. For the interval \([-1,5]\), the computed result is
+\[
+\boxed{V(\ln100,1)\approx 8.59888676.}
+\]
+
+\subsection*{(d)}
+
+Changing the spatial interval to \([-2,10]\) while keeping
+\(h=0.01\) and \(k=1/225\), the boundary approximations become
+\[
+V(-2,\tau)=0,\qquad
+V(10,\tau)=e^{10}-100e^{-0.05\tau}.
+\]
+Running the same code with
+\texttt{option\_value(-2.0, 10.0)} gives
+\[
+\boxed{V(\ln100,1)\approx 8.59888870.}
+\]
+The difference between the results in parts (c) and (d) is
+approximately \(1.94\times10^{-6}\).
+
+\newpage
+\section*{Appendix: Code for Q5(c)}
+\small
+\begin{minted}{python}
+import numpy as np
+
+# Model parameters
+K = 100.0          # Strike price
+S0 = 100.0         # Stock price at which we evaluate the option
+r = 0.05           # Risk-free interest rate
+sigma = 0.15       # Volatility
+
+# Discretization
+h = 0.01           # Step size in x = ln(S)
+m = 225            # Number of time steps
+k = 1.0 / m        # Time step size
+nu = r - sigma**2 / 2
+
+# Coefficients of the explicit finite difference scheme:
+# V_i^{j+1} = c_minus V_{i-1}^j + c_zero V_i^j + c_plus V_{i+1}^j
+c_minus = sigma**2 * k / (2 * h**2) - nu * k / (2 * h)
+c_zero = 1 - sigma**2 * k / h**2 - r * k
+c_plus = sigma**2 * k / (2 * h**2) + nu * k / (2 * h)
+
+def value(a, b):
+    # Construct the spatial grid on [a, b]
+    n = round((b - a) / h)
+    x = a + h * np.arange(n + 1)
+
+    # At tau = 0, the option value equals its payoff
+    V = np.maximum(np.exp(x) - K, 0.0)
+    new_V = np.empty_like(V)
+
+    # Advance the solution from tau = 0 to tau = 1
+    for j in range(m):
+        # Update all interior grid points using values at the old time level
+        new_V[1:-1] = (
+            c_minus * V[:-2]
+            + c_zero * V[1:-1]
+            + c_plus * V[2:]
+        )
+
+        # Set boundary values at the new time level
+        tau_next = (j + 1) * k
+        new_V[0] = 0.0
+        new_V[-1] = np.exp(b) - K * np.exp(-r * tau_next)
+
+        # Swap the old and new arrays for the next time step
+        V, new_V = new_V, V
+
+    # ln(S0) is generally between grid points: interpolate linearly
+    target = np.log(S0)
+    position = (target - a) / h
+    i = int(np.floor(position))
+    weight = position - i
+
+    return (1.0 - weight) * V[i] + weight * V[i + 1]
+
+print("[-1, 5]: ", value(-1.0, 5.0))
+print("[-2, 10]:", value(-2.0, 10.0))
+\end{minted}
+
+\end{document}

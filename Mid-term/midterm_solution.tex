@@ -1,0 +1,784 @@
+\documentclass[a4paper,12pt]{article}
+\marginparwidth 0 pt
+\oddsidemargin 0 truecm
+\evensidemargin  0 pt
+\marginparsep 0 pt
+\topmargin 0 truecm
+\headsep 0 pt
+\textheight 23 truecm
+\textwidth 14.9 truecm
+\hoffset 0.5 truecm
+\footskip 60 pt
+\usepackage{fancyvrb}%\begin{Verbatim}[frame=single]
+\usepackage{amsmath,enumitem}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.2pt}
+\renewcommand{\headrulewidth}{0pt} % Remove head line.
+\pagestyle{fancy}
+\usepackage{lastpage}
+\cfoot{P.\thepage\ of \pageref{LastPage} }
+\usepackage{xspace}
+%%\usepackage{layout}
+
+\def \la{{\langle}}
+\def \ra{{\rangle}}
+\def \R{{\mathbb  R}}
+\def \P{{\mathbb  P}}
+\def \C{{\mathbb  C}}
+\def \H{{\mathbb  H}}
+\def \Z{{\mathbb  Z}}
+\newcommand{\N}{{\Bbb N}}
+%\def \displaystyle\int{{\displaystyle\int}}
+
+\def \i{{\bf i}}
+\def \fd{{\bullet}}
+\def \proof{{\noindent {\bf Proof.} \ \ }}
+\newcommand{\qed}{\begin{flushright} {\bf Q.E.D.}\ \ \ \ \
+                  \end{flushright} }
+
+\newcommand{\MySoln}[1]{ {#1}\xspace }
+\renewcommand{\MySoln}[1]{ \xspace }  %Remove2ShowQuestion-1/3%
+\newcommand{\MySn}{\newpage $\ $}
+\renewcommand{\MySn}{ \xspace }  %Remove2ShowQuestion-2/3%
+%Comment out below for solution: \baselineskip=22pt  %Remove2ShowQuestion-3/3%
+
+\begin{document}
+
+\centerline{\bf THE UNIVERSITY OF HONG KONG}
+\bigskip
+\centerline{\bf DEPARTMENT OF MATHEMATICS}
+
+\vskip 2truecm
+\noindent
+MATH4907: NUMERICAL METHODS FOR FINANCIAL CALCULUS
+
+\vskip 1truecm
+\noindent
+20 October, 2026 \hfill 1:05p.m. -- 2:40p.m.
+
+\it
+\vskip 1truecm
+\noindent
+Only approved calculators as announced by the Examinations Secretary can be
+used in this examination.  It is candidates' responsibility to ensure that
+their calculator operate satisfactorily, and candidates must record the name
+and type of the calculator used on the front page of the examination script.
+
+
+\vskip 2truecm
+
+\rm
+\centerline{Answer ALL {\bf 4} questions}
+
+\vskip 1truecm
+
+\noindent
+
+{\bf Read each question carefully. You may not be credited any score if you put down your conclusion ONLY.}
+
+\hfill\\
+
+{\bf Instructions}
+
+\begin{itemize}%[label=(\roman*)]%[(i)]
+%\item It is an OPEN BOOK test but you MUST COMPLETE THE WORK BY YOURSELVES.
+%\item Please hand write your solutions in blank paper. Typed solution would not be accepted.
+%\item Please include the calculations in your solution neatly. This requirement is to ensure that you are not using any mathematics software (which is forbidden).
+%\item Please follow the exam policy by HKU and place two cameras from the side and front. Record your screen, and send to me by email after the exam. 
+\item You should stop working at 2:40pm.
+%\item Prepare and upload a soft copy of your solutions from 5:00pm to 5:10pm. You should prepare a single pdf file (less than 10MB) of solutions and {\bf upload your PDF file via the designated MOODLE drop box before 5:10pm}.
+%\item {\it You are still allowed to upload the pdf files in the grace period 1545-1615}. However, you must write to the teacher to explain your late submission, with the completed ``Late Submission Investigation Form'' before the deadline (would be announced after the test). {\it If the excuse is not accepted, the candidate would be disqualified in this test.}
+\item {\bf No submission would be accepted after 2:40pm}. 
+\end{itemize}
+
+
+{\bf Note:} You should always give precise and adequate explanations to support your
+conclusions.  Clarity of presentation of your argument counts.  So {\bf think carefully before you
+write.}
+
+\newpage
+\baselineskip=22pt  %Remove2ShowQuestion-3/3%
+
+
+\bigskip
+
+\begin{enumerate} 
+\item (20 points) For each question, select \textbf{all} correct answers.  
+There may be more than one correct answer for each question.
+\begin{enumerate}[label=(\arabic*)]
+\item Which statements about arbitrage and the no-arbitrage principle are correct?
+\begin{enumerate}[label=\Alph*.]
+    \item An arbitrage strategy may have non-positive initial value.
+    \item An arbitrage strategy has zero probability of loss at some future time.
+    \item An arbitrage strategy must guarantee strictly positive profit in every state.
+    \item If two portfolios have the same terminal payoff almost surely, then they should have the same initial value under no-arbitrage.
+    \item No-arbitrage is one of the fundamental principles used to price contingent claims.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, D, E}
+\item In the Black--Scholes model, which statements are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item The underlying asset price follows
+    \[
+    dS_t=\mu S_t\,dt+\sigma S_t\,dW_t.
+    \]
+    \item \(W_t\) denotes a Wiener process.
+    \item The derivative value is written as \(V_t=V(t,S_t)\).
+    \item The volatility parameter is usually denoted by \(r\).
+    \item The risk-free bond grows as
+    \[
+    B_t=B_0e^{rt}.
+    \]
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, E}
+\item Which statements about the binomial tree model are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item In one time step, the stock price can move to either \(uS_i\) or \(dS_i\).
+    \item The no-arbitrage condition is
+    \[
+    d<e^{r\Delta t}<u.
+    \]
+    \item The risk-neutral probability is
+    \[
+    q=\frac{e^{r\Delta t}-d}{u-d}.
+    \]
+    \item The real-world probability \(p\) must be used directly for derivative pricing.
+    \item The derivative value can be computed by backward induction.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, E}
+\item Which statements about the trinomial tree model are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item The stock price may move up, down, or remain unchanged.
+    \item In log-price form, the movement may be written as
+    \[
+    x_{i+1}\in\{x_i+\Delta x,x_i,x_i-\Delta x\}.
+    \]
+    \item The probabilities are often denoted by \(p_u,p_0,p_d\).
+    \item The probabilities must satisfy
+    \[
+    p_u+p_0+p_d=1.
+    \]
+    \item The trinomial tree is stable for every choice of \(\Delta x\).
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, D}
+\item Which finite difference formulas are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item Forward difference:
+    \[
+    f'(x)\approx \frac{f(x+h)-f(x)}{h}.
+    \]
+    \item Central difference for the first derivative:
+    \[
+    f'(x)\approx \frac{f(x+h)-f(x-h)}{2h}.
+    \]
+    \item Central difference for the second derivative:
+    \[
+    f''(x)\approx \frac{f(x-h)-2f(x)+f(x+h)}{h^2}.
+    \]
+    \item The forward difference approximation has error \(O(h^2)\).
+    \item The central difference approximation for \(f'(x)\) has error \(O(h^2)\).
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, E}
+\item For the heat equation
+\[
+u_\tau=u_{xx},
+\]
+with
+\[
+\lambda=\frac{k}{h^2},
+\]
+which statements about the explicit finite difference scheme are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item The explicit scheme computes the next time level directly from the current time level.
+    \item The explicit scheme can be written as
+    \[
+    u^{j+1}=(I-\lambda B)u^j+\lambda c^j.
+    \]
+    \item The explicit scheme requires solving a matrix equation at every time step.
+    \item The usual stability condition is
+    \[
+    0<\lambda\leq \frac12.
+    \]
+    \item If \(\lambda\) is too large, the numerical solution may become unstable.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, D, E}
+\item Which statements about the implicit finite difference scheme are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item It may require solving a linear system at each time step.
+    \item For the heat equation, one form is
+    \[
+    (I+\lambda B)u^j=u^{j-1}+\lambda c^j.
+    \]
+    \item It is called implicit because unknown future time-level values appear in the equation.
+    \item The matrix \(I+\lambda B\) is strictly diagonally dominant for \(\lambda>0\).
+    \item The implicit scheme is always identical to the explicit scheme.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, D}
+\item Which statements about consistency, stability, and convergence are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item Consistency means the finite difference scheme approximates the PDE locally as the grid is refined.
+    \item Stability means numerical errors do not grow uncontrollably during computation.
+    \item Convergence means the numerical solution approaches the exact solution as \(\Delta x,\Delta t\to0\).
+    \item The Lax equivalence theorem relates consistency, stability, and convergence for suitable linear problems.
+    \item A consistent scheme is always convergent, even if it is unstable.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, D}
+\item Which statements about lattice methods and finite difference methods are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item Tree models can be interpreted as particular explicit finite difference schemes.
+    \item A trinomial tree may be obtained from a finite difference discretization of the transformed Black--Scholes equation.
+    \item If
+    \[
+    h^2=k\sigma^2,
+    \]
+    then \(p_0=0\), giving a binomial tree model.
+    \item The probabilities \(p_u,p_0,p_d\) must be nonnegative to be interpreted as probabilities.
+    \item Lattice methods and finite difference methods are completely unrelated.
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, D}
+\item Which statements about Fourier stability analysis are correct?
+
+\begin{enumerate}[label=\Alph*.]
+    \item Fourier analysis can be used to study stability of finite difference schemes with constant coefficients.
+    \item The amplification factor describes how Fourier modes evolve from one time level to the next.
+    \item For the explicit heat scheme, the amplification factor is
+    \[
+    g(\xi)=1-4\lambda\sin^2\left(\frac{\xi}{2}\right).
+    \]
+    \item Stability requires that high-frequency errors do not grow uncontrollably.
+    \item The explicit heat scheme is stable for all \(\lambda>0\).
+\end{enumerate}
+
+\textbf{Correct answers: A, B, C, D}
+\end{enumerate}
+\newpage
+\item (15 points) Define a European call option with strike price $K$, expiry $T$, and the price of underlying asset following the Geometric Brownian motion, 
+\begin{align*}
+\mathrm{d}S_t=\mu S_t\mathrm{d}t+\sigma S_t\mathrm{d}W_t.
+\end{align*}
+Let the risk neutral interest rate be $r$. Given the parameters
+\[ S_0 = K = 100,\ r=0.05,\ \sigma=0.15,\ T=1. \]
+{Use $2$--step CRR binomial tree to price a European call option. }
+\begin{enumerate}
+ \item (5 points) Compute the up factor $u$ and down factor $d$.
+ \item (5 points) Compute the risk-neutral probability $p$.
+  \item (5 points) Compute the value of the European call option.
+\end{enumerate}
+%\begin{solution}
+\begin{proof}\mbox{}
+We use a 2-step CRR binomial tree. Hence
+\[
+N=2,\qquad \Delta t=\frac{T}{N}=\frac{1}{2}.
+\]
+
+\begin{enumerate}
+    \item In the CRR model, the up factor and down factor are
+    \[
+    u=e^{\sigma\sqrt{\Delta t}},
+    \qquad
+    d=e^{-\sigma\sqrt{\Delta t}}.
+    \]
+    Substituting the given parameters,
+    \[
+    u=e^{0.15\sqrt{0.5}}
+    \approx 1.1119,
+    \]
+    and
+    \[
+    d=e^{-0.15\sqrt{0.5}}
+    \approx 0.8994.
+    \]
+    Therefore,
+    \[
+    \boxed{u\approx 1.1119,\qquad d\approx 0.8994.}
+    \]
+
+    \item The risk-neutral probability is
+    \[
+    p=\frac{e^{r\Delta t}-d}{u-d}.
+    \]
+    Thus,
+    \[
+    p
+    =
+    \frac{e^{0.05(0.5)}-0.8994}{1.1119-0.8994}.
+    \]
+    Since
+    \[
+    e^{0.025}\approx 1.0253,
+    \]
+    we get
+    \[
+    p
+    \approx
+    \frac{1.0253-0.8994}{1.1119-0.8994}
+    \approx 0.5926.
+    \]
+    Hence,
+    \[
+    \boxed{p\approx 0.5926.}
+    \]
+
+    \item At maturity, the possible stock prices are
+    \[
+    S_{uu}=S_0u^2,
+    \qquad
+    S_{ud}=S_0ud,
+    \qquad
+    S_{dd}=S_0d^2.
+    \]
+    Since \(S_0=100\), we have
+    \[
+    S_{uu}=100(1.1119)^2\approx 123.6311,
+    \]
+    \[
+    S_{ud}=100(1.1119)(0.8994)\approx 100,
+    \]
+    and
+    \[
+    S_{dd}=100(0.8994)^2\approx 80.8858.
+    \]
+
+    The payoff of a European call option is
+    \[
+    C_T=(S_T-K)^+.
+    \]
+    Therefore, the terminal payoffs are
+    \[
+    C_{uu}=(123.6311-100)^+=23.6311,
+    \]
+    \[
+    C_{ud}=(100-100)^+=0,
+    \]
+    and
+    \[
+    C_{dd}=(80.8858-100)^+=0.
+    \]
+
+    Using backward induction,
+    \[
+    C_0
+    =
+    e^{-rT}
+    \left[
+    p^2 C_{uu}
+    +2p(1-p)C_{ud}
+    +(1-p)^2C_{dd}
+    \right].
+    \]
+    Since \(C_{ud}=C_{dd}=0\), this simplifies to
+    \[
+    C_0=e^{-0.05}p^2C_{uu}.
+    \]
+    Substituting the values,
+    \[
+    C_0
+    =
+    e^{-0.05}(0.5926)^2(23.6311).
+    \]
+    Hence,
+    \[
+    C_0\approx 7.8945.
+    \]
+
+    Therefore, the 2-step CRR binomial tree price of the European call option is
+    \[
+    \boxed{C_0\approx 7.89.}
+    \]
+
+\end{enumerate}
+
+\end{proof}
+
+\newpage
+\item (20 points) Consider the initial boundary value problem (IBVP)
+\[ \left\{ \begin{array}{ll}
+u_t - 2u_{xx} + u = 0, &\quad \mbox{for all $(x,t)\in(0,1)\times(0,+\infty)$}\\
+u(x,0) = \phi_0(x), &\quad \mbox{for all $x \in (0,1)$}\\
+u(0,t)=u(1,t) = 0, \quad \mbox{for all $t > 0$}
+\end{array}\right.. \]
+for some function $\phi_0 : (0,1) \to \mathbb R$. 
+
+It's decided to find a numerical solution to this IBVP over $[0,1]\times[0,T]$ for some fixed $T>0$ as following. Set $k=T/m$ and $h=1/(n+1)$ for some $m, n \in \mathbb N$; and set $x_i=ih$ and $t_j=jk$. Approximate $u_t(x_i,t_j)$ by a forward finite difference and approximate $u_{xx}(x_i,t_j)$ by the centered finite difference.
+
+\begin{enumerate}
+\item Put down the finite difference scheme in terms of $v_{i,j}$, the approximation of $u(x_i,t_j)$.
+\item Find the amplification factor of this finite difference scheme. Hence, show that the scheme is  stable with respect to $\|\cdot\|_{2,\Delta x}$. If it is not unconditionally stable, please state clearly the condition.
+\item 
+\begin{enumerate}[label=(\roman*)]
+\item Show that the scheme is consistent with the pde with respect to $\|\cdot\|_{\infty}$. State the assumptions you have made.
+\item Express the finite difference scheme in matrix form. Hence, or otherwise, determine whether the scheme is convergent with respect to $\|\cdot\|_\infty$.
+\end{enumerate}
+\end{enumerate}
+
+
+\begin{proof}\mbox{}
+\begin{enumerate}
+\item With the suggested approximation by finite differences, we have
+\begin{gather*}
+\frac{v_{i,j+1}-v_{i,j}}k - 2 \frac{v_{i-1,j}-2v_{i,j}+v_{i+1,j}}{h^2} + v_{i,j} = 0\\
+v_{i,j+1}-v_{i,j} - 2\lambda \left( v_{i-1,j}-2v_{i,j}+v_{i+1,j} \right) + k v_{i,j} = 0\\
+v_{i,j+1} = 2\lambda v_{i-1,j} + (1-k-4\lambda) v_{i,j} + 2\lambda v_{i+1,j}
+\end{gather*}
+where $\lambda=k/h^2$.
+
+\item The finite difference scheme is equivalent to
+\[ \mathbf v_{j+1} = \left( 2\lambda \tau_{-1} + (1-k-4\lambda) \tau_0 + 2\tau_{+1} \right) \mathbf v_j. \]
+Apply the discrete Fourier transform to the above equation to get
+\begin{eqnarray*}
+\mathcal F(\mathbf v_{j+1})(\xi) &=& \left( 2\lambda e^{-\sqrt{-1}\xi} + (1-k-4\lambda) + 2\lambda e^{\sqrt{-1}\xi} \right)\mathcal F(\mathbf v_{j})(\xi)\\
+&=& \left[ 1 - k - 4\lambda + 4\lambda\cos\xi \right] F(\mathbf v_{j})(\xi)\\
+&=& \left[ 1 - k - 4\lambda \left( 1 - \cos\xi \right) \right] F(\mathbf v_{j})(\xi)\\
+&=& \left( 1 - k - 8\lambda \sin^2\frac\xi 2 \right) F(\mathbf v_{j})(\xi)
+\end{eqnarray*}
+So the amplification factor is
+\[ g(\xi) = \left( 1 - 8\lambda \sin^2\frac\xi 2 \right) - k. \]
+Clearly, $\displaystyle 1 - 8\lambda \sin^2\frac\xi 2 \le 1$. On the other hand,
+\[ 1 - 8\lambda \sin^2\frac\xi 2 \ge -1 \quad\iff\quad \lambda \le \frac 14. \]
+Assume that $0 < \lambda \le 1/4$. Then
+\[ |g(\xi)| \le \left| 1 - 8\lambda \sin^2\frac\xi 2 \right| + k \le 1+k \le e^{k}. \]
+It follows that the scheme is stable with respect to $\|\cdot\|_{2,\Delta x}$ (with $K=\beta=1$).
+
+\item 
+\begin{enumerate}[label=(\roman*)]
+\item Let $u$ be a solution of the pde and set $u_{i,j}=u(x_i,t_j)$. Apply the Taylor's theorem to get
+\begin{eqnarray*}
+\tau_{i,j} &=& \frac{u_{i,j+1}-u_{i,j}}k - 2 \frac{u_{i-1,j}-2u_{i,j}+u_{i+1,j}}{h^2} + u_{i,j}\\
+&=& (u_t)_{i,j} + \frac 12 u_{tt}(x_i,(1-s_1)t_i+s_1t_{i+1}) t  + u_{i,j} \\
+&&\ - 2 \left( 
+(u_{xx})_{i,j} + \frac 1{24} \left( u_{xxxx}((1-s_2)x_{i-1}+s_2x_i) + u_{xxxx}((1-s_3)x_{i-1}+s_3x_i) \right) h^2 \right)\\
+&=& (u_t-2u_{xx}+u)_{i,j} + \frac 12 u_{tt}(x_i,(1-s_1)t_i+s_1t_{i+1}) k\\
+&&\ - \frac 1{12} \left( u_{xxxx}((1-s_2)x_{i-1}+s_2 x_i) + u_{xxxx}((1-s_3)x_{i-1}+s_3 x_i) \right) h^2 \\
+&=& \frac 12 u_{tt}(x_i,(1-s_1)t_i+s_1t_{i+1}) k\\
+&&\ - \frac 1{12} \left( u_{xxxx}((1-s_2)x_{i-1}+s_2 x_i) + u_{xxxx}((1-s_3)x_{i-1}+s_3 x_i) \right) h^2
+\end{eqnarray*}
+for some $0 < s_1,s_2,s_3 < 1$.
+
+Let $R=[0,1]\times[0,T]$. Under the assumptions that $u_{tt}$ and $u_{xxxx}$ are bounded over $R$, we have
+\begin{gather*}
+|\tau_{i,j}| \le \frac 12 \max_{(x,t)\in R}\ |u_{tt}(x,t)|\ k + \frac 16 \max_{(x,t)\in R}\ |u_{xxxx}(x,t)|\ h^2\\
+\|\boldsymbol\tau_j\|_\infty \le \frac 12 \max_{(x,t)\in R}\ |u_{tt}(x,t)|\ k + \frac 16 \max_{(x,t)\in R}\ |u_{xxxx}(x,t)|\ h^2.
+\end{gather*}
+It follows that $\|\boldsymbol\tau_j\|_\infty=O(h^2)+O(k)$ so that the scheme is consistent with the pde with respect to $\|\cdot\|_\infty$.
+
+\item Using the boundary condition, $v_{0,j} = v_{n+1,j} = 0$ for all $j$. The finite difference scheme in matrix form is
+\[ \mathbf v_{j+1} = A\mathbf x_j \]
+where $A=(a_{ij})$ is a tridiagonal matrix with
+\[ a_{ij} = \left\{ \begin{array}{ll}
+1-k-4\lambda &\ \mbox{if $i=j$}\\
+2\lambda &\ \mbox{if $|i-j|=1$}\\
+0 &\ \mbox{otherwise}
+\end{array}\right.. \]
+Note that
+\[ 1-k-4\lambda \ge 0 \ \iff\ 1-k\left(1-\frac 4{h^2}\right) \ge 0 \ \iff\ k \le \frac{h^2}{4+h^2} (<1). \]
+It follows that if $0 < k \le \dfrac{h^2}{4+h^2}$, then
+\[ \|A\|_\infty = \max\left\{ |1-k-4\lambda|+|2\lambda|,|1-k-4\lambda|+2|2\lambda| \right\} = 1-k-4\lambda+4\lambda = 1-k \in (0,1) \]
+so that the scheme is stable with respect to $\|\cdot\|_\infty$ ($A$ is symmetric).
+
+Lastly, as the scheme is consistent with respect to $\|\cdot\|_\infty$. By the Lax theorem, the scheme is convergent with respect to the $\|\cdot\|_\infty$. \qedhere
+\end{enumerate} 
+\end{enumerate} 
+\end{proof}
+
+Remark: 2+8+(4+6)
+
+
+\newpage
+
+\item (5 points) Refer to finite difference scheme in `Demonstration', by using a linear interpolation the price of the European call at $t=0$ is \$8.5889337. Meanwhile, the price derived from the Black-Scholes pricing formula is \$8.5916583. The percentage error is about 0.0317\%. Although the approximation sounds good, your boss wants to further reduce the percentage error. 
+
+Give two suggestions, with different origins, to modify the current models (the mathematical model and the computational model/script) to your boss.
+
+Mathematical proof nor programing are not required. However, you should explain your suggestions and state the possible tradeoffs if applicable.
+
+The script of 'Demonstration 01' is shown below for your easy reference.
+
+\begin{center}
+\begin{Verbatim}[frame=single,fontsize=\footnotesize]
+%Demonstration: 
+%Using Matlab to Implement Explicit Finite Difference Scheme
+%to Price a European Call
+
+clear;
+
+%basic parameters
+S0=100; K=S0; r=0.05; sigma=0.15; T=1;
+n=25; % number of interior spatial points
+m=50; % number of temporal steps (no. of iterations)
+
+%computed constants
+Sr=S0*exp((r-sigma^2/2)*T+6*sigma*sqrt(T));
+h=Sr/(n+1); % spatial step size
+k=T/m; %temporal step size
+
+%define the vector b
+b=zeros(n,1);
+b(end)=0.5*(sigma^2*n^2+r*n)*Sr;
+
+%Define the iteration matrix G
+G=diag(-(sigma^2*(1:n)^2+r)); % G=A11
+G=G+diag(0.5*(sigma^2*(1:(n-1))+r).*(1:(n-1)),1); % G=A11+A12
+G=G+diag(0.5*(sigma^2*(2:n)-r).*(2:n),-1); % G=A11+A12+A21 (=A)
+G=eye(n,n)+k*G; % G=I+kA
+
+%Iteration
+v=max(h*(1:n)'-K,0) % initialize v, v=v0
+
+for j=1:m
+    v=G*v+k*b; % v_j=G*v_(j-1)+k*b
+end
+\end{Verbatim}
+\end{center}
+
+\begin{proof}
+It is an open ended question so that any reasonable suggestions with explanations are fine.
+
+Some possible modifications are given below.
+\begin{itemize}
+\item Increase the values of $n$ and/or $m$ if we believe the scheme is accurate of order $(2,1)$. It may be safe to keep the ratio of $k/h^2$ unchanged to reduce the chance that the scheme becomes unstable. Since the system of equations becomes larger and the number of iterations increases, the time consumed would be increased.
+
+\item Modify the (artificial) boundary condition $V(S_r,T)=S_r$. Indeed, $S_r\approx 256$ which is not a good approximation of $V(S_r,T)=(S_r-100)^+\approx 156$ ($256/156\approx 1.64$). One may then change the boundary condition to $V(S_r,T)=(S_r-K)^+=S_r-K$. Alternatively, one may take a large value of $S_r$, for instance take $S_r=1000$ so that $V(S_r,T)=900$ ($1000/900\approx 1.11$). In the later approach, one may better increase $n$ (and hence $m$) if interpolation is to be used. \qedhere
+\end{itemize}
+\end{proof}
+
+Remark: 3+3
+
+\end{enumerate}
+
+%\newpage
+
+%\begin{center}
+%{\it You may continue your solutions here.}
+%\end{center}
+\vfill
+
+\begin{center}{\it The End}\end{center}
+
+\end{document}
+\textit{Solution.}
+\begin{enumerate}
+\item \begin{enumerate}
+\item[(a)] \textbf{Example:} Consider the probability space $(\Omega, \mathcal{F}, \mathbb{P})$ where $\Omega = \{1,2,3,4\}$, $\mathcal{F} = 2^{\Omega}$, and $\mathbb{P}$ is any probability measure (for instance, uniform measure). Define a random variable $X:\Omega \to \mathbb{R}$ by
+\[
+X(\omega) = \omega.
+\]
+Now, define a function $f:\mathbb{R} \to \mathbb{R}$ as follows:
+\[
+f(x) = \begin{cases}
+0, & x \in \{1, 2\}, \\
+1, & x \in \{3, 4\}.
+\end{cases}
+\]
+Then, the $\sigma$-algebra generated by $f(X)$, denoted $\sigma(f(X))$, is
+\[
+\sigma(f(X)) = \{\emptyset, \Omega, A, A^c\},
+\]
+where
+\[
+A = \{\omega \in \Omega : f(X(\omega)) = 1\} = \{3,4\}.
+\]
+The $\sigma$-algebra generated by $X$, $\sigma(X)$, is
+\[
+\sigma(X) = \{\emptyset, \Omega, \{\omega: X(\omega) \leq c\} \text{ for all } c \in \mathbb{R}\}.
+\]
+Specifically, it contains all subsets generated by the singleton sets $\{\omega\}$ because $X$ distinguishes all points. Since $A = \{3,4\}$ is a proper subset of $\Omega$, and $\sigma(f(X))$ only distinguishes between the sets where $f(X)$ is 0 or 1, it is strictly smaller than $\sigma(X)$. Moreover, since $\sigma(f(X))$ is generated by the partition $\{\{3,4\}, \{1,2\}\}$, it is non-trivial but strictly smaller than the full $\sigma$-algebra generated by $X$, which distinguishes all singleton points.
+
+\item[(b)] \textbf{Answer:} No, the $\sigma$-algebra generated by $f(X)$ can never be strictly larger than $\sigma(X)$. This is because $f(X)$ is a measurable function of $X$, and the $\sigma$-algebra generated by $f(X)$, $\sigma(f(X))$, is always contained within $\sigma(X)$:
+\[
+\sigma(f(X)) \subseteq \sigma(X).
+\]
+Therefore, the $\sigma$-algebra generated by $f(X)$ cannot be strictly larger than that generated by $X$.
+\end{enumerate}
+\item \begin{enumerate}
+\item[(a)] \textbf{Calculation of }$\mathbb{E}[\mathrm{Err}]$:
+
+Recall that $\mathrm{Err} = Y - \mathbb{E}[Y|\mathcal{G}]$. Since $\mathbb{E}[Y|\mathcal{G}]$ is the conditional expectation of $Y$ given $\mathcal{G}$, it satisfies the property
+\[
+\mathbb{E}[\mathbb{E}[Y|\mathcal{G}]] = \mathbb{E}[Y].
+\]
+Using linearity of expectation:
+\[
+\mathbb{E}[\mathrm{Err}] = \mathbb{E}[Y - \mathbb{E}[Y|\mathcal{G}]] = \mathbb{E}[Y] - \mathbb{E}[\mathbb{E}[Y|\mathcal{G}]] = \mathbb{E}[Y] - \mathbb{E}[Y] = 0.
+\]
+\textbf{Answer:}
+\[
+\boxed{
+\mathbb{E}[\mathrm{Err}] = 0.
+}
+\]
+
+\item[(b)] \textbf{Proof of the variance decomposition:}
+
+Given $X$ is $\mathcal{G}$-measurable, define $\mu := \mathbb{E}[Y - X]$.
+
+We want to show:
+\[
+\mathrm{Var}(Y - X) = \mathbb{E}[\mathrm{Err}^2] + \mathbb{E}\left[(\mathbb{E}[Y|\mathcal{G}] - X - \mu)^2\right].
+\]
+
+Starting with the left side:
+\[
+\mathrm{Var}(Y - X) = \mathbb{E}[(Y - X - \mu)^2].
+\]
+
+Note that:
+\[
+Y - X - \mu = (Y - \mathbb{E}[Y|\mathcal{G}]) + (\mathbb{E}[Y|\mathcal{G}] - X - \mu) = \mathrm{Err} + (\mathbb{E}[Y|\mathcal{G}] - X - \mu).
+\]
+
+Since $\mathrm{Err}$ is orthogonal (uncorrelated) to any $\mathcal{G}$-measurable random variable (by properties of conditional expectation), we have:
+\[
+\mathbb{E}[\mathrm{Err} \cdot (\mathbb{E}[Y|\mathcal{G}] - X - \mu)] = 0.
+\]
+
+Therefore,
+\[
+\mathrm{Var}(Y - X) = \mathbb{E}\left[(\mathrm{Err} + (\mathbb{E}[Y|\mathcal{G}] - X - \mu))^2\right] = \mathbb{E}[\mathrm{Err}^2] + \mathbb{E}\left[(\mathbb{E}[Y|\mathcal{G}] - X - \mu)^2\right],
+\]
+as the cross term vanishes.
+
+\textbf{Answer:}
+\[
+\boxed{
+\mathrm{Var}(Y - X) = \mathbb{E}[\mathrm{Err}^2] + \mathbb{E}\left[(\mathbb{E}[Y|\mathcal{G}] - X - \mu)^2\right].
+}
+\]
+
+\item[(c)] \textbf{Inequality for the variance of the error:}
+
+Since the variance of the error is minimized when choosing the conditional expectation as the estimator, for any $\mathcal{G}$-measurable $X$, the following inequality holds:
+\[
+\mathrm{Var}(\mathrm{Err}) \leq \mathrm{Var}(Y - X).
+\]
+
+\textit{Proof:}
+
+From part (b), setting $\mu = 0$ (since variance is unaffected by adding constants), we have:
+\[
+\mathrm{Var}(Y - X) = \mathbb{E}[\mathrm{Err}^2] + \mathbb{E}[(\mathbb{E}[Y|\mathcal{G}] - X)^2].
+\]
+Since the second term is non-negative,
+\[
+\mathrm{Var}(Y - X) \geq \mathbb{E}[\mathrm{Err}^2] = \mathrm{Var}(\mathrm{Err}),
+\]
+which completes the proof.
+
+\textbf{Answer:}
+\[
+\boxed{
+\mathrm{Var}(\mathrm{Err}) \leq \mathrm{Var}(Y - X).
+}
+\]
+\end{enumerate}
+\item
+\begin{enumerate}
+\item[(a)] \textbf{Limit of} 
+\[
+\sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})(t_{j+1} - t_j) \quad \text{as} \quad \|\Pi\| \to 0.
+\]
+Since $\{W_{t_{j+1}} - W_{t_j}\}_{j=0}^{n-1}$ are mutually independent, and $W_{t_{j+1}} - W_{t_j}\sim N(0,t_{j+1}-t_j)$, we obtain
+\begin{align*}
+\mathbb{E}\left[\left(\sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})(t_{j+1} - t_j) \right)^2\right]
+&=\sum_{j=0}^{n-1}\mathbb{E}\left[\left(W_{t_{j+1}} - W_{t_j}\right)^2\right](t_{j+1} - t_j)\\
+&=\sum_{j=0}^{n-1}(t_{j+1} - t_j)^2\\
+&\leq\|\Pi\|\sum_{j=0}^{n-1}(t_{j+1} - t_j)=\|\Pi\|T\to 0 \text{ as } \|\Pi\|\to 0.
+\end{align*}
+\textbf{Solution:} 
+\[
+\boxed{
+\lim_{\|\Pi\| \to 0} \sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})(t_{j+1} - t_j) = 0 \quad \text{in } L^2(\Omega).
+}
+\]
+
+\item[(b)] \textbf{Limit of} 
+\[
+\sum_{j=0}^{n-1} (t_{j+1} - t_j)^2 \quad \text{as} \quad \|\Pi\| \to 0.
+\]
+\textbf{Solution:} 
+This sum depends only on the partition of the interval, independent of the Wiener process:
+\[
+\sum_{j=0}^{n-1} (t_{j+1} - t_j)^2\leq\|\Pi\|\sum_{j=0}^{n-1}(t_{j+1} - t_j)=\|\Pi\|T\to 0 \text{ as } \|\Pi\|\to 0.
+\]
+\[
+\boxed{
+\lim_{\|\Pi\| \to 0} \sum_{j=0}^{n-1} (t_{j+1} - t_j)^2 = 0.
+}
+\]
+
+\item[(c)] \textbf{Limit of} 
+\[
+\sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})^3 \quad \text{as} \quad \|\Pi\| \to 0.
+\]
+\textbf{Solution:} 
+Since \(W_{t_{j+1}} - W_{t_j}\) are independent normal increments with mean zero, and
+\[
+(W_{t_{j+1}} - W_{t_j})^3\sim N(0, 15(t_{j+1}-t_j)^3)
+\]
+\begin{align*}
+\mathbb{E}\left[\left(\sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})^3\right)^2\right]&=
+\sum_{j=0}^{n-1}\mathbb{E}\left[ (W_{t_{j+1}} - W_{t_j})^6\right]\\
+&=15\sum_{j=0}^{n-1}(t_{j+1}-t_j)^3\\
+&\leq 15\|\Pi\|^2T\to 0\text{ as }\|\Pi\|\to 0.
+\end{align*}
+Hence,
+\[
+\boxed{
+\lim_{\|\Pi\| \to 0} \sum_{j=0}^{n-1} (W_{t_{j+1}} - W_{t_j})^3 = 0 \quad \text{in } L^2(\Omega).
+}
+\]
+\end{enumerate}
+\item \begin{enumerate}
+        \item Change the order of integration, we obtain
+        \begin{align*}        
+                \mathbb{E}\bigg[ \int_0^T |t^2 W_t|^2 \,dt \bigg] 
+                &= \int_0^T t^4 \mathbb{E}\bigg[ W_t^2 \bigg] \,dt 
+                = \int_0^T t^4 \times t \,dt \\
+                &= T^6/6 < \infty. 
+        \end{align*}
+        Here, we have used the property $W_t\sim N(0,t)$.
+        \item \begin{equation*}
+            \mathbb{E}[\xi(T)] = \mathbb{E}\bigg[ \int_0^T t^2W_t \,dW_t \bigg] = 0. 
+        \end{equation*}
+        
+        \begin{equation*}
+            \begin{split}
+                \operatorname{Var}(\xi(T)) &=  \mathbb{E}[\xi(T)^2] - ( \mathbb{E}[\xi(T)])^2 \\
+                &=  \mathbb{E}\bigg[ \big( \int_0^T t^2W_t \,dW_t \big)^2 \bigg] - 0 \\
+                &= T^6/6. 
+            \end{split}
+        \end{equation*}
+        
+        \item Yes. 
+    $$ X_t = X_0\exp( (\mu_1 - \frac{\sigma_1^2}{2})t + \sigma_1 W_t), $$
+    $$ Y_t = Y_0\exp( (\mu_2 - \frac{\sigma_2^2}{2})t + \sigma_2 W_t). $$
+    Then 
+    $$ Z_t = Z_0\exp( (\mu_1 - \frac{\sigma_1^2}{2} + \mu_2 - \frac{\sigma_2^2}{2})t + (\sigma_1 + \sigma_2) W_t) $$
+    with $Z_0 = X_0Y_0$. Hence, $Z_t$ is still a geometric Brownian motion. 
+        
+        \item Yes. 
+    $$ U_t = \ln(X_t) - \ln(Y_t) $$
+    Hence, 
+    $$ dU_t = d\ln(X_t) - d\ln(Y_t) = (\mu_1 - \mu_2 + \frac{\sigma_2^2 - \sigma_1^2}{2})\,dt + (\sigma_1 - \sigma_2)\,dW_t.  $$
+    \end{enumerate}
+\end{enumerate}
+\end{document}

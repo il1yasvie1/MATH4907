@@ -1,0 +1,836 @@
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,listings,xcolor}
+\usetheme{Boadilla}
+\useoutertheme{miniframes}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[default]
+\definecolor{codeblue}{RGB}{42,55,150}
+\lstset{language=Python,basicstyle=\ttfamily\scriptsize,keywordstyle=\color{codeblue},
+  showstringspaces=false,columns=fullflexible,keepspaces=true,frame=single,
+  breaklines=true,aboveskip=3pt,belowskip=2pt}
+\newcommand{\BS}{\mathcal L_{\!BS}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\dd}{\mathrm d}
+\newcommand{\pos}[1]{(#1)^+}
+\newcommand{\Qtitle}[1]{\textbf{#1}}
+\title[MATH4907 Tutorial 4]{MATH4907 Tutorial 4}
+\author{Sanyang Liu}
+\date{November 6, 2026}
+\AtBeginSection[]{\begin{frame}{Roadmap}\tableofcontents[currentsection,hideallsubsections]\end{frame}}
+
+\begin{document}
+\maketitle
+
+
+
+\section{Q1: American put}
+
+% ======================================================================
+% Original assignment statements precede the worked solutions.
+% ======================================================================
+\begin{frame}{Q1: Problem statement (1/2) -- American put}
+\small
+\textbf{Given.} An American \emph{put} with strike $K$, expiry $T$ and value
+$V(S,t)$. The underlying follows
+\[
+  \dd S_t=\mu S_t\dd t+\sigma S_t\dd W_t.
+\]
+Write $p(S,t)$ for the corresponding European put price.
+\begin{block}{(a) \hfill 3 points}
+Construct the hedged portfolio $\Pi_t=V_t-\Delta_tS_t$. Use It\^o's formula
+and $\Delta_t=V_S$ to derive
+\[
+  V_t+\tfrac12\sigma^2S^2V_{SS}+rSV_S-rV\leq0.
+\]
+Explain why equality need not hold everywhere for an American option.
+\end{block}
+\begin{block}{(b) \hfill 2 points}
+Use no-arbitrage to explain both $V(S,t)\geq\pos{K-S}$ and $V(S,t)\geq p(S,t)$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q1: Problem statement (2/2) -- Free boundary}
+\footnotesize
+\begin{block}{(c) \hfill 3 points}
+Define the optimal exercise boundary
+\[
+  S_f(t)=\sup\{S\in[0,K]:V(S,t)=\pos{K-S}\}.
+\]
+Using $S_f(t)$, define the \textbf{exercise region} and
+\textbf{continuation region}; explain what the holder does in each region.
+\end{block}
+\begin{block}{(d) \hfill 4 points}
+State the complete \textbf{free-boundary problem} for the American put,
+including the following four items:
+\begin{enumerate}
+\item Black--Scholes PDE in the continuation region;
+\item value matching at $S=S_f(t)$;
+\item terminal payoff at $t=T$;
+\item smooth pasting at $S=S_f(t)$.
+\end{enumerate}
+\end{block}
+\end{frame}
+
+\begin{frame}{Q1: The American put obstacle}
+\small
+The holder may exercise at any time $t\leq T$ and receive $\pos{K-S_t}$.
+Therefore the option must satisfy
+\[
+ V(S,t)\geq \pos{K-S},\qquad V(S,T)=\pos{K-S}.
+\]
+Writing $p(S,t)$ for the corresponding European put, the American holder can
+always wait until $T$, so $V(S,t)\geq p(S,t)$.
+\medskip
+The two possible decisions are:
+\begin{itemize}
+\item \textbf{Exercise:} $V(S,t)=K-S$ for $S<K$.
+\item \textbf{Continue:} $V(S,t)>\pos{K-S}$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Q1(a): Delta hedge}
+\small
+For $\dd S_t=\mu S_t\dd t+\sigma S_t\dd W_t$, It\^o's formula gives
+\[
+\dd V=\bigl(V_t+\mu S V_S+\tfrac12\sigma^2S^2V_{SS}\bigr)\dd t
+       +\sigma S V_S\dd W_t.
+\]
+Over an infinitesimal interval, hold $\Delta=V_S$ shares short against one
+option: $\Pi=V-\Delta S$. The self-financing gain is
+\[
+\dd\Pi=\dd V-\Delta\dd S
+       =\bigl(V_t+\tfrac12\sigma^2S^2V_{SS}\bigr)\dd t.
+\]
+The Brownian term and the physical drift $\mu$ both cancel.
+\end{frame}
+
+\begin{frame}{Q1(a): Why the pricing relation is an inequality}
+\small
+The hedged gain cannot exceed the risk-free return on its value; otherwise
+buying the hedge with borrowed funds gives an arbitrage. Thus
+\[
+V_t+\tfrac12\sigma^2S^2V_{SS}
+ \leq r(V-SV_S),
+\qquad
+\boxed{\BS V:=V_t+\tfrac12\sigma^2S^2V_{SS}+rSV_S-rV\leq0.}
+\]
+The reverse arbitrage argument for a European option does not apply everywhere:
+the American holder controls exercise time. In the continuation region,
+$\BS V=0$. In the interior exercise region, $V=K-S$, so
+\[
+\BS(K-S)=-rK<0\qquad (r>0).
+\]
+\end{frame}
+
+\begin{frame}{Q1(b--c): Dominance and exercise boundary}
+\small
+\begin{itemize}
+\item $V\geq\pos{K-S}$: immediate exercise is an available strategy.
+\item $V\geq p$: following the European strategy (exercise only at expiry)
+is also available.
+\end{itemize}
+\medskip
+Define the optimal boundary
+\[
+S_f(t)=\sup\{S\in[0,K]:V(S,t)=\pos{K-S}\}.
+\]
+For $t<T$, the \textbf{exercise region} is $0\leq S\leq S_f(t)$, and the
+\textbf{continuation region} is $S>S_f(t)$. At $S_f(t)$ the holder is indifferent
+between exercising and continuing.
+\end{frame}
+
+\begin{frame}{Q1(d): Free-boundary problem}
+\small
+Determine both $V(S,t)$ and the unknown curve $S_f(t)$:
+\begin{align*}
+\BS V&=0 && S>S_f(t),\quad 0\leq t<T,\\
+V(S_f(t),t)&=K-S_f(t) &&\text{value matching},\\
+V_S(S_f(t),t)&=-1 &&\text{smooth pasting},\\
+V(S,T)&=\pos{K-S} && S\geq0.
+\end{align*}
+For the no-dividend put, $S_f(T)=K$ in the terminal-limit convention.
+Value matching and smooth pasting apply for $t<T$; the terminal payoff
+has a kink at $S=K$. In the exercise region, $V=K-S$ and
+$\BS V=-rK$ when $r>0$.
+\end{frame}
+
+\section{Q2: Front fixing}
+
+\begin{frame}{Q2: Problem statement (1/2) -- Front fixing}
+\footnotesize
+\textbf{Given.} Write $\beta(t)=S_f(t)$ for the unknown exercise boundary.
+Use the Landau transformation
+\[
+  x=\frac{S}{\beta(t)},\qquad S=x\beta(t),\qquad
+  u(x,t)=V(x\beta(t),t).
+\]
+\begin{block}{(a) \hfill 3 points}
+By the chain rule, show that
+\[
+ xu_x=SV_S,\qquad x^2u_{xx}=S^2V_{SS},\qquad
+ u_t-\frac{x\beta'(t)}{\beta(t)}u_x=V_t.
+\]
+\end{block}
+\begin{block}{(b) \hfill 3 points}
+Substitute these identities into the Black--Scholes PDE and prove
+\[
+ u_t+x\left(r-\frac{\beta'}{\beta}\right)u_x
+ +\tfrac12\sigma^2x^2u_{xx}-ru=0,
+ \qquad 1<x<\infty,\;0<t<T.
+\]
+\end{block}
+\end{frame}
+
+\begin{frame}{Q2: Problem statement (2/2) -- Conditions and grid}
+\small
+\begin{block}{(c) \hfill 3 points}
+Transform the \emph{original} conditions
+\[
+\begin{aligned}
+ V(S_f(t),t)&=K-S_f(t), & V_S(S_f(t),t)&=-1,\\
+ V(S,T)&=\pos{K-S}.
+\end{aligned}
+\]
+State the resulting conditions on $u(x,t)$ and $\beta(t)$.
+\end{block}
+\begin{block}{(d) \hfill 4 points}
+Introduce an artificial boundary $x=x_r$ with $u(x_r,t)=0$.
+Define
+\[
+ h=\frac{x_r-1}{n+1},\quad k=\frac{T}{m},\qquad
+ x_i=1+ih,\;t_j=jk,
+\]
+where $i=0,\ldots,n+1$ and $j=0,\ldots,m$. Write down
+finite-difference approximations for $u_x$, $u_{xx}$ and $u_t$
+suitable for discretizing the transformed PDE.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q2: Landau transformation}
+\small
+Write $\beta(t)=S_f(t)$ and map the moving continuation region onto a fixed strip:
+\[
+x=\frac{S}{\beta(t)},\qquad S=x\beta(t),\qquad
+u(x,t)=V(x\beta(t),t).
+\]
+Now $S>\beta(t)$ is exactly $x>1$. The unknown boundary is always $x=1$.
+\medskip
+The transformation moves the spatial boundary into the coefficient
+$\beta'(t)/\beta(t)$; the transformed PDE must still be coupled to $\beta$.
+\end{frame}
+
+\begin{frame}{Q2(a): Chain-rule identities}
+\small
+Differentiate while keeping the other transformed variable fixed:
+\begin{align*}
+u_x&=\beta V_S,& xu_x&=SV_S,\\
+u_{xx}&=\beta^2V_{SS},&x^2u_{xx}&=S^2V_{SS},\\
+u_t&=V_t+x\beta'V_S
+    =V_t+\frac{x\beta'}{\beta}u_x.
+\end{align*}
+Therefore
+\[
+\boxed{V_t=u_t-\frac{x\beta'}{\beta}u_x.}
+\]
+The time derivative is taken at fixed $S$ on the left, at fixed $x$ on the right.
+\end{frame}
+
+\begin{frame}{Q2(b): PDE on the fixed domain}
+\small
+Substitute the three identities into $\BS V=0$:
+\[
+\boxed{
+u_t+x\left(r-\frac{\beta'}{\beta}\right)u_x
+       +\frac{\sigma^2x^2}{2}u_{xx}-ru=0,
+\qquad 1<x<\infty,\quad 0<t<T.}
+\]
+The $-x\beta' u_x/\beta$ term is due to the moving coordinate.
+Omitting it would solve a different pricing problem.
+\end{frame}
+
+\begin{frame}{Q2(c): Transformed conditions}
+\small
+At $S=\beta(t)$, we have $x=1$. Consequently
+\[
+\boxed{u(1,t)=K-\beta(t)},\qquad
+\boxed{u_x(1,t)=-\beta(t)},\qquad t<T.
+\]
+At expiry $\beta(T)=K$, hence on the continuation strip $x\geq1$,
+\[
+u(x,T)=\pos{K-x\beta(T)}=\pos{K(1-x)}=0.
+\]
+Smooth pasting is a pre-expiry condition; the payoff is not smooth at the
+corner $(x,t)=(1,T)$.
+
+\medskip
+For an artificial distant boundary $x_r>1$, use $u(x_r,t)=0$, since a put
+approaches zero as its stock price becomes large.
+\end{frame}
+
+\begin{frame}{Q2(d): Finite-difference stencils}
+\small
+Let $x_i=1+ih$, $t_j=jk$, $h=(x_r-1)/(n+1)$, $k=T/m$, and
+$U_{i,j}\approx u(x_i,t_j)$. Centered spatial differences give
+\[
+u_x(x_i,t_j)\approx\frac{U_{i+1,j}-U_{i-1,j}}{2h},\qquad
+u_{xx}(x_i,t_j)\approx\frac{U_{i-1,j}-2U_{i,j}+U_{i+1,j}}{h^2}.
+\]
+Because the payoff is known at $t=T$, backward stepping in calendar time
+can use
+\[
+u_t(x_i,t_{j+1})\approx\frac{U_{i,j+1}-U_{i,j}}{k},
+\qquad j=m-1,m-2,\ldots,0.
+\]
+\end{frame}
+
+\begin{frame}{Q2(d): Coupled discrete equations}
+\footnotesize
+One explicit backward-time discretization is
+\begin{align*}
+0={}&\frac{U_{i,j+1}-U_{i,j}}{k}
++x_i\left(r-\frac{\beta_{j+1}-\beta_j}{k\beta_{j+1}}\right)
+\frac{U_{i+1,j+1}-U_{i-1,j+1}}{2h}\\
+&+\frac{\sigma^2x_i^2}{2}
+\frac{U_{i-1,j+1}-2U_{i,j+1}+U_{i+1,j+1}}{h^2}
+-rU_{i,j+1}.
+\end{align*}
+Use $U_{0,j}=K-\beta_j$, $U_{n+1,j}=0$, and the one-sided smooth-pasting
+condition
+\[
+\frac{U_{1,j}-U_{0,j}}{h}\approx-\beta_j,\qquad j<m.
+\]
+These equations determine $\beta_j$ and the new interior values together.
+\end{frame}
+
+\section{Q3: Complementarity}
+
+\begin{frame}{Q3: Problem statement (1/3) -- Heat obstacle}
+\small
+\textbf{Given.} Apply the change of variables
+\[
+ x=\ln(S/K),\quad \tau=\tfrac12\sigma^2(T-t),\quad
+ u=e^{-\alpha x-\beta\tau}V(S,t),
+\]
+where $\alpha=\tfrac12-r/\sigma^2$ and
+$\beta=-(\tfrac12+r/\sigma^2)^2$. The American put satisfies
+\[
+ u_\tau-u_{xx}\geq0,\qquad u-g\geq0,\qquad
+ (u_\tau-u_{xx})(u-g)=0,
+\]
+with $g(x,\tau)=Ke^{-\alpha x-\beta\tau}\pos{1-e^x}$.
+\begin{block}{(a) \hfill 3 points}
+Explain the financial meaning of $u_\tau-u_{xx}\geq0$ and $u-g\geq0$.
+Relate the two inequalities to the exercise and continuation regions.
+\end{block}
+\begin{block}{(b) \hfill 3 points}
+For artificial boundaries $x_l<0<x_r$, explain why it is reasonable
+to impose $u(x_r,\tau)=0$ and $u(x_l,\tau)=g(x_l,\tau)$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q3: Problem statement (2/3) -- Discretization}
+\small
+\begin{block}{(c) \hfill 4 points}
+Apply a \textbf{backward difference} in $\tau$ and a
+\textbf{central difference} in $x$ to $u_\tau-u_{xx}\geq0$.
+Show
+\[
+\frac{u_{i,j}-u_{i,j-1}}{k}
+-\frac{u_{i-1,j}-2u_{i,j}+u_{i+1,j}}{h^2}\geq0
+\]
+and hence, with $\lambda=k/h^2$,
+\[
+ -\lambda u_{i-1,j}+(1+2\lambda)u_{i,j}
+ -\lambda u_{i+1,j}\geq u_{i,j-1}.
+\]
+\end{block}
+\begin{block}{(d) \hfill 3 points}
+For $\bm u^j=(u_{1,j},\ldots,u_{n,j})^\top$ and the obstacle vector
+$\bm g^j$, write the discrete \textbf{matrix LCP} using
+$A\bm u^j-\bm u^{j-1}-\lambda g(x_l,\tau_j)\bm e_1$.
+State the two inequalities, complementarity condition, and define $A$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q3: Problem statement (3/3) -- Standard LCP}
+\small
+\begin{block}{(e) \hfill 2 points}
+Define the nonnegative \emph{excess value over the obstacle}
+\[
+ \bm z=\bm u^j-\bm g^j.
+\]
+Show that the matrix complementarity system from (d) can be written
+\[
+ \boxed{\bm q+A\bm z\geq0,\qquad
+ \bm z\geq0,\qquad(\bm q+A\bm z)^\top\bm z=0.}
+\]
+\textbf{Explicitly express} $\bm q$ in terms of $A$, $\bm g^j$,
+$\bm u^{j-1}$ and the left boundary datum $g(x_l,\tau_j)$.
+\end{block}
+\medskip
+\textbf{Interpretation.} This is not a standard linear system $A\bm z=-\bm q$:
+for each component, one of the two complementary quantities must vanish.
+\end{frame}
+
+\begin{frame}{Q3: From American put to heat obstacle}
+\small
+Set
+\[
+x=\log(S/K),\quad \tau=\frac{\sigma^2}{2}(T-t),\quad
+u=e^{-\alpha x-\beta\tau}V,
+\]
+\[
+\alpha=\frac12-\frac r{\sigma^2},\qquad
+\beta=-\left(\frac12+\frac r{\sigma^2}\right)^2,
+\qquad g=e^{-\alpha x-\beta\tau}K\pos{1-e^x}.
+\]
+The factor $e^{-\alpha x-\beta\tau}$ is positive, so $V\geq\pos{K-S}$
+becomes $u\geq g$. The Black--Scholes operator transforms as
+\[
+\BS V=-\frac{\sigma^2}{2}e^{\alpha x+\beta\tau}(u_\tau-u_{xx}).
+\]
+\end{frame}
+
+\begin{frame}{Q3(a): Financial meaning of complementarity}
+\small
+The transformed problem is
+\[
+u_\tau-u_{xx}\geq0,\qquad u-g\geq0,\qquad
+(u_\tau-u_{xx})(u-g)=0.
+\]
+\begin{itemize}
+\item $u-g\geq0$: the option cannot be worth less than immediate exercise.
+\item $u_\tau-u_{xx}\geq0$: equivalent to $\BS V\leq0$.
+\item \textbf{Continue:} $u>g$ forces $u_\tau-u_{xx}=0$.
+\item \textbf{Exercise:} $u=g$ allows a positive heat residual.
+\end{itemize}
+For $V=K-S$, $\BS V=-rK$, and hence the heat residual is strictly
+positive when $r>0$.
+\end{frame}
+
+\begin{frame}{Q3(b): Artificial log-price boundaries}
+\small
+Choose $x_l<0<x_r$. Since $S=Ke^x$:
+\[
+\boxed{u(x_r,\tau)=0}
+\]
+approximates the small value of a put at large stock prices. At a sufficiently
+negative $x_l$, the stock is deep in the exercise region, so
+\[
+\boxed{u(x_l,\tau)=g(x_l,\tau)}.
+\]
+These conditions truncate an infinite spatial domain. They introduce
+boundary error if $x_l$ or $x_r$ is too close to the option's relevant region.
+\end{frame}
+
+\begin{frame}{Q3(c): Backward Euler in transformed time}
+\small
+With $\lambda=k/h^2$, apply backward Euler at $(x_i,\tau_j)$:
+\[
+\frac{u_{i,j}-u_{i,j-1}}{k}
+-\frac{u_{i-1,j}-2u_{i,j}+u_{i+1,j}}{h^2}\geq0.
+\]
+Multiplication by $k$ yields
+\[
+\boxed{-\lambda u_{i-1,j}+(1+2\lambda)u_{i,j}
+-\lambda u_{i+1,j}\geq u_{i,j-1}.}
+\]
+The obstacle is imposed at the new time: $u_{i,j}\geq g(x_i,\tau_j)$.
+\end{frame}
+
+\begin{frame}{Q3(d): Matrix LCP}
+\small
+Let $\bm u^j=(u_{1,j},\ldots,u_{n,j})^\top$ and
+$\bm g^j=(g(x_1,\tau_j),\ldots,g(x_n,\tau_j))^\top$. Define
+\[
+A=\begin{pmatrix}
+1+2\lambda&-\lambda&&\\-\lambda&1+2\lambda&\ddots&\\
+&\ddots&\ddots&-\lambda\\&&-\lambda&1+2\lambda
+\end{pmatrix},\quad
+\bm b^j=\bm u^{j-1}+\lambda g(x_l,\tau_j)\bm e_1.
+\]
+The right artificial boundary contributes nothing because $u(x_r,\tau_j)=0$.
+The discrete problem is
+\[
+A\bm u^j-\bm b^j\geq0,\quad \bm u^j-\bm g^j\geq0,\quad
+(A\bm u^j-\bm b^j)^\top(\bm u^j-\bm g^j)=0.
+\]
+\end{frame}
+
+\begin{frame}{Q3(e): Shift to a nonnegative unknown}
+\small
+Let $\bm z^j=\bm u^j-\bm g^j\geq0$. Substitute
+$\bm u^j=\bm z^j+\bm g^j$ into the matrix residual:
+\[
+A\bm u^j-\bm b^j=A\bm z^j+\bm q^j,
+\]
+where
+\[
+\boxed{\bm q^j=A\bm g^j-\bm u^{j-1}
+-\lambda g(x_l,\tau_j)\bm e_1.}
+\]
+The standard linear complementarity form is
+\[
+\bm q^j+A\bm z^j\geq0,\qquad \bm z^j\geq0,\qquad
+(\bm q^j+A\bm z^j)^\top\bm z^j=0.
+\]
+\end{frame}
+
+\section{Q4: Projected methods}
+
+\begin{frame}{Q4: Problem statement (1/2) -- Projected methods}
+\small
+\textbf{Given.} The general linear complementarity problem (LCP) is
+\[
+ \bm p+M\bm z\geq0,\quad \bm z\geq0,\quad
+ (\bm p+M\bm z)^\top\bm z=0,
+\]
+equivalently $\min\{\bm z,\bm p+M\bm z\}=\bm0$ componentwise.
+\begin{block}{(a) \hfill 2 points}
+For the scalar case $n=1$, $M=[m]$ with $m>0$, solve
+$\min\{z,p+mz\}=0$ and prove
+\[
+ z=\max\{0,-p/m\}.
+\]
+\end{block}
+\begin{block}{(b) \hfill 3 points}
+Solve $\min\{\bm z,\bm p+M\bm z\}=\bm0$ for
+\[
+ M=\begin{pmatrix}3&0&0\\1&3&0\\1&2&3\end{pmatrix},\qquad
+ \bm p=\begin{pmatrix}-3\\2\\-1\end{pmatrix}.
+\]
+\end{block}
+\end{frame}
+
+\begin{frame}{Q4: Problem statement (2/2) -- Iterations}
+\small
+\textbf{Given.} Write
+\[
+ M=L+D+U,
+\]
+where $D$ is the diagonal, $L$ the strictly lower triangular part,
+and $U$ the strictly upper triangular part.
+\begin{block}{(c) \hfill 2 points}
+Write down the \textbf{projected Jacobi iteration} for the general LCP.
+Specify which iterate is used in the off-diagonal terms and how the
+nonnegativity constraint is enforced.
+\end{block}
+\begin{block}{(d) \hfill 3 points}
+Write down the \textbf{projected Gauss--Seidel iteration}.
+Specify when new vs. old components are used. Explain why the method
+is called ``projected.''
+\end{block}
+\end{frame}
+
+\begin{frame}{Q4(a): One-dimensional complementarity}
+\small
+For $m>0$, solve $\min\{z,p+mz\}=0$. Complementarity says
+\[
+z\geq0,\quad p+mz\geq0,\quad z(p+mz)=0.
+\]
+If $p\geq0$, choose $z=0$. If $p<0$, then $z=0$ violates the second
+inequality, so $p+mz=0$ and $z=-p/m>0$. Therefore
+\[
+\boxed{z=\max\{0,-p/m\}.}
+\]
+The maximum is the projection of the unconstrained root onto $[0,\infty)$.
+\end{frame}
+
+\begin{frame}{Q4(b): Triangular example}
+\small
+For
+\[
+M=\begin{pmatrix}3&0&0\\1&3&0\\1&2&3\end{pmatrix},
+\qquad \bm p=\begin{pmatrix}-3\\2\\-1\end{pmatrix},
+\]
+solve by forward componentwise projection:
+\begin{align*}
+z_1&=\max\{0,-(-3)/3\}=1,\\
+z_2&=\max\{0,-(2+z_1)/3\}=0,\\
+z_3&=\max\{0,-(-1+z_1+2z_2)/3\}=0.
+\end{align*}
+Thus $\boxed{\bm z=(1,0,0)^\top}$, and
+$\bm p+M\bm z=(0,3,0)^\top\geq0$ verifies complementarity.
+\end{frame}
+
+\begin{frame}{Q4(c): Projected Jacobi}
+\small
+Split $M=L+D+U$, with positive diagonal entries $m_{ii}$.
+Using the old iterate for all off-diagonal terms gives
+\[
+\boxed{z_i^{(\ell+1)}=
+\max\left\{0,-\frac{p_i+\sum_{j\ne i}m_{ij}z_j^{(\ell)}}{m_{ii}}\right\},
+\quad i=1,\ldots,n.}
+\]
+Equivalently, each component is projected onto the nonnegative half-line
+after the Jacobi update. Start with $\bm z^{(0)}\geq0$.
+\end{frame}
+
+\begin{frame}{Q4(d): Projected Gauss--Seidel}
+\small
+Use newly computed components to the left and old ones to the right:
+\[
+\boxed{z_i^{(\ell+1)}=
+\max\left\{0,-\frac{p_i+
+\sum_{j<i}m_{ij}z_j^{(\ell+1)}+
+\sum_{j>i}m_{ij}z_j^{(\ell)}}{m_{ii}}\right\}.}
+\]
+It is \emph{projected} because $\max\{0,\cdot\}$ enforces
+$z_i^{(\ell+1)}\geq0$ after each scalar update.
+For a triangular $M$, one Gauss--Seidel sweep from top to bottom solves
+the example in part (b).
+\end{frame}
+
+\section{Q5: Barrier call}
+
+\begin{frame}{Q5: Problem statement (1/3) -- Barrier call}
+\small
+\textbf{Given.} A European \emph{down-and-out call} with strike $K$,
+barrier $H$, expiry $T$ and value $V(S,t)$. If the underlying reaches
+$S_t\leq H$ from above before expiry, the option expires immediately.
+\begin{block}{(a) \hfill 3 points}
+Write the Black--Scholes PDE on $S>H$, $0<t<T$.
+State the \textbf{terminal payoff} and the \textbf{barrier condition}
+at $S=H$.
+\end{block}
+\begin{block}{(b) \hfill 3 points}
+Use
+\[
+ x=\ln(S/H),\quad \tau=\tfrac12\sigma^2(T-t),\quad
+ V(S,t)=e^{a\tau+bx}u(x,\tau),
+\]
+where $b=\tfrac12-r/\sigma^2$ and $a=-b^2-2r/\sigma^2$.
+Show that $u_\tau-u_{xx}=0$ and state the boundary condition at $x=0$.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q5: Problem statement (2/3) -- Numerical pricing}
+\small
+\begin{block}{(c) \hfill 5 points}
+Implement an \textbf{explicit FDM} for the transformed heat equation with
+\[
+ S_0=100,\quad K=95,\quad H=80,\quad T=1,\quad
+ r=0.05,\quad\sigma=0.30.
+\]
+Use the artificial boundary
+\[
+ x_r=(r-\tfrac12\sigma^2)T+8\sigma\sqrt{T},
+\]
+with a suitable boundary condition at $x=x_r$, and choose the mesh so that
+\[
+ \lambda=k/h^2\leq\tfrac12.
+\]
+Compute $V(S_0,0)$ and compare with the \textbf{analytic benchmark}
+$15.429266$. Submit the code and briefly explain interpolation when
+$S_0$ is not located exactly at a spatial grid point.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q5: Problem statement (3/3) -- Interpretation}
+\footnotesize
+\begin{block}{(d) \hfill 2 points}
+Explain why the down-and-out call is cheaper than the corresponding
+vanilla European call with the same strike and expiry.
+\end{block}
+\begin{block}{(e) \hfill 2 points}
+Repeat the computation in (c) with \textbf{at least two different mesh sizes}.
+Briefly discuss the \textbf{stability} and \textbf{convergence} of the
+computed option prices.
+\end{block}
+\begin{alertblock}{Submission requirements (Assignment 4, p.~6)}
+\begin{enumerate}
+\item Clear derivations for the theoretical questions;
+\item the finite-difference code for Question 5;
+\item numerical estimates of $V(S_0,0)$;
+\item a short discussion of boundary conditions, stability,
+interpolation and accuracy.
+\end{enumerate}
+\end{alertblock}
+\end{frame}
+
+\begin{frame}{Q5(a): Down-and-out call problem}
+\small
+Assume $H<K$ (as in the numerical data). The option survives while $S>H$:
+\begin{align*}
+V_t+\tfrac12\sigma^2S^2V_{SS}+rSV_S-rV&=0,
+&&S>H,\quad 0<t<T,\\
+V(S,T)&=\pos{S-K},&&S>H,\\
+V(H,t)&=0,&&0\leq t\leq T.
+\end{align*}
+Hitting $H$ extinguishes the contract immediately. For an artificial large
+stock boundary, $V(S,t)\simeq S-Ke^{-r(T-t)}$.
+\end{frame}
+
+\begin{frame}{Q5(b): Heat-equation transformation}
+\small
+Take
+\[
+x=\log(S/H),\quad \tau=\frac{\sigma^2}{2}(T-t),\quad
+V=e^{a\tau+bx}u,\quad
+b=\frac12-\frac r{\sigma^2},\quad
+a=-b^2-\frac{2r}{\sigma^2}.
+\]
+After changing variables, the Black--Scholes PDE divided by
+$\sigma^2e^{a\tau+bx}/2$ becomes
+\[
+-u_\tau+u_{xx}+(2b+2r/\sigma^2-1)u_x
+ +(b^2+(2r/\sigma^2-1)b-2r/\sigma^2-a)u=0.
+\]
+The chosen $a,b$ cancel the first- and zeroth-order terms, leaving
+$\boxed{u_\tau-u_{xx}=0}$ for $x>0$.
+\end{frame}
+
+\begin{frame}{Q5(b): Initial and barrier data}
+\small
+At $\tau=0$, calendar time is $T$, so
+\[
+\boxed{u(x,0)=e^{-bx}\pos{He^x-K}},\qquad x>0.
+\]
+The barrier $S=H$ maps to $x=0$. Since the exponential factor never
+vanishes,
+\[
+\boxed{u(0,\tau)=0},\qquad 0\leq\tau\leq\tau_*:=\frac{\sigma^2T}{2}.
+\]
+At the requested price $S_0$, evaluate the heat solution at
+$x_0=\log(S_0/H)$ and $\tau_*$, then undo the transformation:
+\[
+V(S_0,0)=e^{a\tau_*+bx_0}u(x_0,\tau_*).
+\]
+\end{frame}
+
+\begin{frame}{Q5(c): Far-field boundary and parameters}
+\small
+The assignment specifies
+\[
+x_r=(r-\tfrac12\sigma^2)T+8\sigma\sqrt T=2.405,
+\quad S_r=He^{x_r}\simeq886.2744.
+\]
+At such a large stock value, use $V(S_r,t)\simeq S_r-Ke^{-r(T-t)}$.
+Since $T-t=2\tau/\sigma^2$, the transformed boundary is
+\[
+\boxed{u(x_r,\tau)=e^{-a\tau-bx_r}
+\left(He^{x_r}-Ke^{-2r\tau/\sigma^2}\right).}
+\]
+For the data, $\tau_*=0.045$, $x_0=\log(1.25)\simeq0.223144$.
+\medskip
+
+\footnotesize Lecture 4, slide 54, writes $e^{-r\tau}$ in its last formula.
+The stated time scaling requires $e^{-2r\tau/\sigma^2}$.
+\end{frame}
+
+\begin{frame}{Q5(c): Explicit heat scheme}
+\small
+Set $h=x_r/N$, $k=\tau_*/m$, $\lambda=k/h^2$, and
+$U_i^j\approx u(ih,jk)$. Then
+\[
+\boxed{U_i^{j+1}=(1-2\lambda)U_i^j
++\lambda U_{i-1}^j+\lambda U_{i+1}^j},\quad 1\leq i<N.
+\]
+Initialize $U_i^0=e^{-bih}\pos{He^{ih}-K}$. At each step set
+$U_0^{j+1}=0$ and $U_N^{j+1}=u(x_r,(j+1)k)$.
+\medskip
+\textbf{Stability:} nonnegative weights require $0\leq\lambda\leq1/2$,
+as specified in both the assignment and Lecture 4.
+\end{frame}
+
+\begin{frame}{Q5(c): Recovering an off-grid price}
+\small
+Usually $x_0=\log(S_0/H)$ lies between grid points $x_i$ and $x_{i+1}$.
+With $\theta=(x_0-x_i)/h$, linearly interpolate the heat solution:
+\[
+u(x_0,\tau_*)\approx(1-\theta)U_i^m+\theta U_{i+1}^m.
+\]
+Then multiply by $e^{a\tau_*+bx_0}$. Interpolating $u$ in $x$ is
+consistent with the grid on which the heat equation was solved.
+\medskip
+For these parameters the analytical down-and-out call price is
+$15.429265555$ (quoted as $15.429266$ in the assignment).
+\end{frame}
+
+\begin{frame}{Q5(c,e): Numerical convergence}
+\small
+Explicit scheme with target $\lambda=0.4$; $m$ is rounded up, so actual
+$\lambda\leq0.4$.
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+$N$ intervals & $m$ steps & $\lambda$ & FD price & Absolute error\\\midrule
+200&779&0.399489&15.433241249&0.003975693\\
+400&3113&0.399874&15.429952908&0.000687352\\
+600&7003&0.399945&15.429627064&0.000361508\\
+800&12449&0.399970&15.429450136&0.000184580\\\bottomrule
+\end{tabular}
+\end{center}
+\vspace{.2cm}
+Prices move toward the benchmark as the mesh is refined. All runs obey the
+explicit stability bound; remaining error includes discretization and
+linear interpolation.
+\end{frame}
+
+\begin{frame}{Q5(d): Why the barrier call is cheaper}
+\small
+Path by path, the down-and-out payoff is
+\[
+\pos{S_T-K}\,\bm 1_{\{\min_{0\leq s\leq T}S_s>H\}}
+\leq\pos{S_T-K},
+\]
+the vanilla European call payoff. Discounting and taking risk-neutral
+expectations preserves this order:
+\[
+V_{\rm DO}(S_0,0)\leq C_{\rm vanilla}(S_0,0).
+\]
+Numerically, $C_{\rm vanilla}\simeq16.801211384$ and
+$V_{\rm DO}\simeq15.429265555$. The difference is the value lost on
+paths that hit the barrier before expiry.
+\end{frame}
+
+\begin{frame}[fragile]{Q5: Complete code, setup}
+\begin{lstlisting}
+from math import ceil, exp, log, sqrt
+import numpy as np
+
+S0, K, H, T = 100., 95., 80., 1.
+r, sigma = .05, .30
+b = .5 - r/sigma**2
+a = -b**2 - 2*r/sigma**2
+tau_end = sigma**2*T/2
+x_right = (r-sigma**2/2)*T + 8*sigma*sqrt(T)
+
+def upper_boundary(tau):
+    remaining = 2*tau/sigma**2
+    value = H*exp(x_right) - K*exp(-r*remaining)
+    return exp(-a*tau-b*x_right)*value
+\end{lstlisting}
+The accompanying Python file includes the analytic comparator and all
+reported mesh sizes.
+\end{frame}
+
+\begin{frame}[fragile]{Q5: Complete code, time stepping}
+\begin{lstlisting}
+def price(N, lambda_target=.4):
+    h = x_right/N
+    m = ceil(tau_end/(lambda_target*h*h))
+    k, lam = tau_end/m, tau_end/m/h**2
+    x = np.linspace(0., x_right, N+1)
+    u = np.exp(-b*x)*np.maximum(H*np.exp(x)-K, 0.)
+    u[0] = 0.
+    for j in range(m):
+        new = np.empty_like(u)
+        new[1:-1] = (1-2*lam)*u[1:-1] + lam*(u[:-2]+u[2:])
+        new[0] = 0.
+        new[-1] = upper_boundary((j+1)*k)
+        u = new
+    x0 = log(S0/H)
+    value = exp(a*tau_end+b*x0)*np.interp(x0,x,u)
+    return m, lam, value
+
+for N in (200, 400, 600, 800):
+    print(N, price(N))
+\end{lstlisting}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,336 @@
+\documentclass{article}
+\usepackage{graphicx}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{xcolor}
+\usepackage{geometry}
+\geometry{left=2cm, right=2cm, top=2cm, bottom=2cm}
+
+\newcommand{\bE}{\mathbb{E}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\cF}{\mathcal{F}}
+
+\title{MATH4907 Assignment 1}
+\author{Sanyang Liu}
+\date{September 2026}
+
+\begin{document}
+
+\maketitle
+
+\section*{Problem 1}
+Let
+\[
+\widetilde{V}_i:=e^{-ir\Delta t}V_i,
+\qquad
+T=n\Delta t,
+\qquad
+\Omega=\{U,D\}^n.
+\]
+Assume that \(S_0\) is known at time \(t_0\) and that
+\(\mathcal{F}_0\) is trivial. We have
+\begin{align*}
+V_0
+&= \widetilde{V}_0
+&&\text{(by the definition of \(\widetilde{V}_i\))}\\
+&= \mathbb{E}^{\mathbb{Q}}
+   \left[\widetilde{V}_n\mid\mathcal{F}_0\right]
+&&\text{(by the $\bQ$-martingale property)}\\
+&= e^{-rT}\mathbb{E}^{\mathbb{Q}}
+   \left[V_n\mid\mathcal{F}_0\right]
+&&\text{(since \(\widetilde{V}_n=e^{-nr\Delta t}V_n=e^{-rT}V_n\))}\\
+&= e^{-rT}\mathbb{E}^{\mathbb{Q}}
+   \left[(S_n-K)^+\mid\mathcal{F}_0\right]
+&&\text{(by the European call payoff)}\\
+&= e^{-rT}\mathbb{E}^{\mathbb{Q}}
+   \left[(S_n-K)^+\right]
+&&\text{(since \(\mathcal{F}_0\) is trivial)}\\
+&= e^{-rT}
+   \sum_{\omega\in\Omega}
+   \bigl(S_n(\omega)-K\bigr)^+
+   \mathbb{Q}(\{\omega\})
+&&\text{(by the definition of expectation)}\\
+&= e^{-rT}
+   \sum_{i=0}^{n}
+   \binom{n}{i}
+   q^{\,n-i}(1-q)^i
+   \left(S_0u^{n-i}d^i-K\right)^+
+&&\text{(grouping paths with \(i\) down moves)}\\
+&= e^{-rT}
+   \sum_{i=0}^{n}
+   \binom{n}{i}
+   q^{\,n-i}(1-q)^i
+   \left(S_0u^{n-i}d^i-K\right)
+   \mathbf{1}_{\{S_0u^{n-i}d^i>K\}}
+&&\text{(since \(x^+=x\mathbf{1}_{\{x>0\}}\))}\\
+&=
+S_0
+\sum_{i=0}^{n}
+\binom{n}{i}
+\left(uqe^{-r\Delta t}\right)^{n-i}
+\left(d(1-q)e^{-r\Delta t}\right)^i
+\mathbf{1}_{\{S_0u^{n-i}d^i>K\}}
+\\
+&\quad
+-
+Ke^{-rT}
+\sum_{i=0}^{n}
+\binom{n}{i}
+q^{\,n-i}(1-q)^i
+\mathbf{1}_{\{S_0u^{n-i}d^i>K\}}
+&&\text{(using \(e^{-rT}=e^{-rn\Delta t}\))}\\
+&=
+S_0
+\sum_{i=0}^{i_0}
+\binom{n}{i}
+\left(uqe^{-r\Delta t}\right)^{n-i}
+\left(d(1-q)e^{-r\Delta t}\right)^i
+\\
+&\quad
+-
+Ke^{-rT}
+\sum_{i=0}^{i_0}
+\binom{n}{i}
+q^{\,n-i}(1-q)^i
+&&
+\begin{gathered}\big(
+i_0:=
+\max\left\{
+i\in\{0,1,\ldots,n\}:
+S_0u^{n-i}d^i>K
+\right\}\big)
+\end{gathered}
+\end{align*}
+The definition of \(q\) implies
+\[
+uqe^{-r\Delta t}
++
+d(1-q)e^{-r\Delta t}
+=
+e^{-r\Delta t}
+\bigl(qu+(1-q)d\bigr)
+=1.
+\]
+Therefore, defining the CDF for the binomial distribution,
+\[
+F^{B(n,p)}(k)
+:=
+\sum_{i=0}^{k}
+\binom{n}{i}
+p^i(1-p)^{n-i},
+\]
+we obtain
+\[
+\boxed{
+V_0
+=
+S_0
+F^{B\left(n,d(1-q)e^{-r\Delta t}\right)}(i_0)
+-
+Ke^{-rT}
+F^{B(n,1-q)}(i_0).
+}
+\]
+
+\newpage
+\section*{Problem 2}
+Let \(h:=\Delta t\). By the definition of \(\upsilon^2\) in (1.2) on page 22,
+\[
+\upsilon^2(h)=e^{(2r+\sigma^2)h}.
+\]
+Define
+\[
+A(h)
+:=
+\frac{1+\upsilon^2(h)}{2e^{rh}}
+=
+\frac12\left(e^{-rh}+e^{(r+\sigma^2)h}\right).
+\]
+Under the CRR condition \(ud=1\), the up and down factors are given by
+\[
+u=A(h)+\sqrt{A(h)^2-1},
+\qquad
+d=A(h)-\sqrt{A(h)^2-1}.
+\]
+For any fixed constant \(a\), the Taylor expansion of \(e^{ah}\) at \(h=0\) is
+\[
+e^{ah}=1+ah+O(h^2),
+\qquad h\to0.
+\]
+Therefore,
+\[
+\begin{aligned}
+A(h)
+&=
+\frac12\left(e^{-rh}+e^{(r+\sigma^2)h}\right)\\
+&=
+\frac12\left[
+1-rh+O(h^2)
++
+1+(r+\sigma^2)h+O(h^2)
+\right]\\
+&=
+1+\frac12\sigma^2h+O(h^2).
+\end{aligned}
+\]
+Consequently,
+\[
+\begin{aligned}
+A(h)^2-1
+&=
+\left(1+\frac12\sigma^2h+O(h^2)\right)^2-1\\
+&=
+\sigma^2h+O(h^2).
+\end{aligned}
+\]
+Assuming \(\sigma>0\), we obtain
+\[
+\begin{aligned}
+\sqrt{A(h)^2-1}
+&=
+\sqrt{\sigma^2h+O(h^2)}\\
+&=
+\sqrt{h}\,\sqrt{\sigma^2+O(h)}\\
+&=
+\sigma\sqrt{h}\,\sqrt{1+O(h)}\\
+&=
+\sigma\sqrt{h}\left(1+O(h)\right)\\
+&=
+\sigma\sqrt{h}+O(h^{3/2}).
+\end{aligned}
+\]
+Substituting these expansions into the formulas for \(u\) and \(d\), we obtain
+\[
+\boxed{
+u
+=
+1+\sigma\sqrt{\Delta t}
++\frac12\sigma^2\Delta t
++O\left(\Delta t^{3/2}\right)
+}
+\]
+and
+\[
+\boxed{
+d
+=
+1-\sigma\sqrt{\Delta t}
++\frac12\sigma^2\Delta t
++O\left(\Delta t^{3/2}\right).
+}
+\]
+
+\newpage
+\section*{Problem 3}
+Let
+\[
+\Delta X_i:=x_{i+1}-x_i.
+\]
+For the continuous model,
+\[
+\mathbb{E}[\Delta X_i]=\nu\Delta t,
+\qquad
+\operatorname{Var}(\Delta X_i)=\sigma^2\Delta t,
+\]
+where
+\[
+\nu=\mu-\frac12\sigma^2.
+\]
+Since
+\[
+\mathbb{E}[(\Delta X_i)^2]
+=
+\operatorname{Var}(\Delta X_i)
++
+\bigl(\mathbb{E}[\Delta X_i]\bigr)^2,
+\]
+we have
+\[
+\mathbb{E}[(\Delta X_i)^2]
+=
+\sigma^2\Delta t+\nu^2\Delta t^2.
+\]
+In the trinomial tree, the increment $\Delta X_i$ takes the values
+\[
+\Delta x_u,\qquad 0,\qquad \Delta x_d
+\]
+with probabilities
+\[
+p_u,\qquad p_0,\qquad p_d,
+\]
+respectively. Matching the first moment and the second raw moment gives
+\[
+\begin{cases}
+p_u\Delta x_u+p_d\Delta x_d=\nu\Delta t,\\[4pt]
+p_u\Delta x_u^2+p_d\Delta x_d^2
+=\sigma^2\Delta t+\nu^2\Delta t^2.
+\end{cases}
+\]
+Assuming the CRR condition,
+\[
+ud=1
+\quad\Longrightarrow\quad
+\Delta x_u=-\Delta x_d=:\Delta x.
+\]
+Therefore,
+\[
+\begin{cases}
+p_u\Delta x-p_d\Delta x=\nu\Delta t,\\[4pt]
+p_u\Delta x^2+p_d\Delta x^2
+=\sigma^2\Delta t+\nu^2\Delta t^2.
+\end{cases}
+\]
+Dividing the two equations by $\Delta x$ and $\Delta x^2$, respectively, yields
+\[
+p_u-p_d=\frac{\nu\Delta t}{\Delta x},
+\]
+and
+\[
+p_u+p_d
+=
+\frac{\sigma^2\Delta t+\nu^2\Delta t^2}{\Delta x^2}.
+\]
+Adding and subtracting these two equations, we obtain
+\[
+\boxed{
+p_u
+=
+\frac12\left(
+\frac{\sigma^2\Delta t+\nu^2\Delta t^2}{\Delta x^2}
++
+\frac{\nu\Delta t}{\Delta x}
+\right)
+}
+\]
+and
+\[
+\boxed{
+p_d
+=
+\frac12\left(
+\frac{\sigma^2\Delta t+\nu^2\Delta t^2}{\Delta x^2}
+-
+\frac{\nu\Delta t}{\Delta x}
+\right).
+}
+\]
+Finally, using
+\[
+p_u+p_0+p_d=1,
+\]
+we obtain
+\[
+\boxed{
+p_0
+=
+1-
+\frac{\sigma^2\Delta t+\nu^2\Delta t^2}{\Delta x^2}.
+}
+\]
+
+
+
+
+
+\end{document}

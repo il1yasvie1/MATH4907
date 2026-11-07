@@ -1,0 +1,960 @@
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs}
+\usetheme{Boadilla}
+\useoutertheme{miniframes}
+\setbeamertemplate{navigation symbols}{}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\norm}[1]{\left\|#1\right\|}
+
+
+\title{MATH4907 Tutorial 3}
+\author{Sanyang Liu}
+\date{October 25, 2026}
+
+\begin{document}
+\maketitle
+\AtBeginSection[]
+{
+    \begin{frame}{Table of Contents}
+        \tableofcontents[
+            currentsection,
+            hideallsubsections
+        ]
+    \end{frame}
+}
+
+\begin{frame}{Personal Information}
+\begin{itemize}
+  \item TA: Sanyang Liu
+  \item Office: Room 320A Run Run Shaw Building (Email me first)
+  \item Email: \texttt{u3013241@connect.hku.hk}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Convergence of Scheme}
+Last tutorial, we studied
+\begin{itemize}
+    \item Finite difference stencils and their order of accuracy
+    \item Finite difference schemes and their local truncation errors
+\end{itemize}
+
+However, local accuracy alone \textbf{does not guarantee} global convergence of the numerical solution to the exact solution as the grid is refined.
+
+\begin{block}{Definition: Convergence of a Scheme}
+Let $u^j$ denote the exact solution sampled on the grid at time $\tau_j$,
+and let $v^j$ be the numerical solution. The scheme is (conditionally)
+convergent with respect to the norm $\|\cdot\|$ if, for every fixed $t>0$,
+\[
+\|v^j-u^j\|\longrightarrow 0
+\qquad\text{as } h,k\longrightarrow 0^+,
+\]
+whenever $(h,k)\in\Lambda$ and $\tau_j\longrightarrow t$, for some
+admissible set $\Lambda\subset(0,\infty)^2$.
+\end{block}
+\end{frame}
+
+
+\section{Consistency}
+\begin{frame}{Order of Accuracy of the $\theta$-Scheme}
+\begin{block}{Question 1}
+Consider the heat equation $u_\tau-u_{xx}=0$
+and the $\theta$-scheme
+\[
+v_{j+1}=v_j-(1-\theta)\lambda Bv_j-\theta\lambda Bv_{j+1},
+\qquad \theta\in(0,1).
+\]
+Determine the order of accuracy of this scheme.
+\end{block}
+\end{frame}
+
+\begin{frame}{Substituting Exact Solution}
+\begin{block}{$\theta$-Scheme}
+\[
+\frac{v_{i,j+1}-v_{i,j}}{k}
+=
+(1-\theta)\frac{v_{i-1,j}-2v_{i,j}+v_{i+1,j}}{h^2}
++\theta\frac{v_{i-1,j+1}-2v_{i,j+1}+v_{i+1,j+1}}{h^2},
+\]
+where $x_i=ih$ and $\tau_j=jk$.
+\end{block}
+Substituting the exact solution into the scheme and using Taylor
+expansions gives the following approximations:
+\[
+\frac{u(x_i,\tau_{j+1})-u(x_i,\tau_j)}{k}
+=
+u_\tau(x_i,\tau_j)
++\frac{k}{2}u_{\tau\tau}(x_i,\tau_j)
++O(k^2).
+\]
+\[
+\frac{u(x_{i-1},\tau_j)-2u(x_i,\tau_j)+u(x_{i+1},\tau_j)}{h^2}
+=
+u_{xx}(x_i,\tau_j)+O(h^2).
+\]
+\end{frame}
+
+\begin{frame}{Local Truncation Error}
+At $\tau_{j+1}$, the centered difference gives
+\[
+\frac{u(x_{i-1},\tau_{j+1})-2u(x_i,\tau_{j+1})+u(x_{i+1},\tau_{j+1})}{h^2}
+=
+u_{xx}(x_i,\tau_{j+1})+O(h^2).
+\]
+Expanding $u_{xx}$ in time about $\tau_j$,
+\[
+u_{xx}(x_i,\tau_{j+1})
+=
+u_{xx}(x_i,\tau_j)+k u_{xx\tau}(x_i,\tau_j)+O(k^2).
+\]
+
+Therefore, the local truncation error is
+\[
+\begin{aligned}
+\mathcal{T}_{i,j}
+&=
+u_\tau-(1-\theta)u_{xx}-\theta u_{xx}
++k\left(\frac12u_{\tau\tau}-\theta u_{xx\tau}\right)
++O(h^2)+O(k^2)\\
+&=
+{u_\tau-u_{xx}}
++k\left(\frac12u_{\tau\tau}-\theta u_{xx\tau}\right)
++O(h^2)+O(k^2).
+\end{aligned}
+\]
+\end{frame}
+
+\begin{frame}{Order of Accuracy}
+Using the heat equation and differentiating it with respect to $\tau$,
+\[
+u_\tau=u_{xx},
+\qquad
+u_{\tau\tau}=u_{xx\tau},
+\]
+the local truncation error becomes
+\[
+\mathcal{T}_{i,j}
+=
+\left(\frac12-\theta\right)k u_{\tau\tau}
++O(h^2)+O(k^2).
+\]
+
+If $\theta\neq\frac12$, then
+\[
+\boxed{\mathcal{T}_{i,j}=O(h^2)+O(k),}
+\]
+If $\theta=\frac12$, the first-order time term vanishes, giving
+\[
+\boxed{\mathcal{T}_{i,j}=O(h^2)+O(k^2).}
+\]
+Thus, the Crank--Nicolson scheme is second-order accurate in both space and time.
+
+\end{frame}
+
+\begin{frame}{Consistency}
+
+\begin{block}{Definition: Consistency of Scheme}
+Assume the scheme can be written as $v^{j+1}=Q(v^j)+k\,G^j,$
+where $Q:V\to V$ is linear and $G^j$ encodes the boundary conditions.
+
+Let $u^j$ be the exact solution sampled on the grid. The scheme is
+\textbf{consistent} with the PDE in the norm $\|\cdot\|$ if
+\[
+\left\|
+\frac{u^{j+1}-Q(u^j)}{k}-G^j
+\right\|\longrightarrow 0
+\quad\text{as }h,k\longrightarrow0^+,
+\qquad (h,k)\in\Lambda,
+\]
+for an admissible set $\Lambda\subset(0,\infty)^2$.
+\end{block}
+\begin{block}{Remark}
+The norm $\|\cdot\|$ may depend on $h=\Delta x$,
+since the length of the grid vectors changes with the grid (e.g., $\|x\|_{2,\Delta x_n}^2
+=
+\Delta x_n\|x\|_2^2
+=
+\Delta x_n\sum_{i=1}^n |x_i|^2$).
+\end{block}
+\end{frame}
+
+\begin{frame}{Consistency of the $\theta$-Scheme}
+
+For homogeneous boundary conditions, write the scheme as
+\[
+v^{j+1}=Q(v^j),\qquad
+Q=(I+\theta\lambda B)^{-1}
+\bigl(I-(1-\theta)\lambda B\bigr),
+\qquad \lambda=\frac{k}{h^2}.
+\]
+
+The truncation error is
+\[
+\boldsymbol{\tau}^j=\frac{1}{k}\bigl(u^{j+1}-Q(u^j)\bigr),
+\]
+whose $i$th component is the local truncation error
+\[
+\mathcal{T}_{i,j}
+=
+\left(\frac12-\theta\right)k\,u_{\tau\tau}(x_i,\tau_j)
++O(h^2)+O(k^2).
+\]
+
+Thus, $\|\boldsymbol{\tau}^j\|\to0$ as $h,k\to0^+$, so the scheme is consistent.
+
+\end{frame}
+
+\begin{frame}{Consistency Alone Does Not Ensure Convergence}
+
+For $u_\tau=u_{xx}$ with $u(x,0)=\sin(\pi x)$,
+\[
+u(x,\tau)=e^{-\pi^2\tau}\sin(\pi x),
+\qquad
+u(0.2,0.5)\approx0.004227.
+\]
+
+The explicit scheme has local truncation error
+$O(k+h^2)$, but its stability depends on $\lambda=k/h^2$.
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$h$ & $k$ & $\lambda=k/h^2$ & Numerical value at $(0.2,0.5)$\\
+\midrule
+$0.1$ & $0.0005$ & $0.05$ & $0.0043492$\\
+$0.1$ & $0.01$ & $1$ & $-2694895.2$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+When $\lambda=1$, errors grow as the scheme advances in time.
+To describe how errors propagate and whether they remain bounded,
+we introduce the concept of \textbf{stability} of the scheme.
+\end{frame}
+
+
+
+\section{Stability}
+\begin{frame}{Stability}
+We still consider a two-level finite difference scheme
+\[
+v^{j+1}=Q(v^j).
+\]
+The scheme is \textbf{stable} with respect to the norm $\|\cdot\|$ if there
+exist constants $\Delta t_0,\Delta x_0,K>0$ and $\beta\ge 0$ such that
+\[
+\|v^j\|\le K e^{\beta j\Delta t}\|v^0\|
+\]
+whenever
+\[
+(\Delta x,\Delta t)\in
+\bigl((0,\Delta x_0)\times(0,\Delta t_0)\bigr)\cap\Lambda,
+\qquad \Lambda\subset(0,\infty)^2.
+\]
+\begin{block}{Remark}
+Stability of a finite difference scheme is analogous to well-posedness
+of the PDE.
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Lax Equivalence Theorem}
+\begin{block}{Theorem: Lax Equivalence Theorem}
+For a well-posed initial-value problem for a linear PDE, a consistent
+two-level finite difference scheme is convergent \textbf{if and only if} it is
+stable.
+\end{block}
+
+\begin{itemize}
+    \item A well-posed IVP has a solution that depends continuously on its
+    initial data.
+    \item A two-level scheme involves only two consecutive time levels,
+    $t_j$ and $t_{j+1}$.
+\end{itemize}
+
+\vfill
+{\footnotesize
+Reference: P.~D.~Lax and R.~D.~Richtmyer,
+``Survey of the Stability of Linear Finite Difference Equations,''
+\textit{Communications on Pure and Applied Mathematics},
+vol.~9, no.~2, pp.~267--293, 1956.
+}
+
+\end{frame}
+
+
+
+
+
+
+\begin{frame}{Discrete Fourier Transform}
+
+\begin{block}{Definition: Discrete Fourier Transform}
+\[
+\mathcal{F}:\ell^2(\mathbb{Z})\longrightarrow L^2([-\pi,\pi]),
+\qquad
+(\mathcal{F}v)(\xi)=\widehat v(\xi)
+=\frac{1}{\sqrt{2\pi}}\sum_{j\in\mathbb Z}v_j e^{-\ii j\xi}.
+\]
+\end{block}
+Here, $\ell^2(\mathbb{Z})$ is the space of square-summable sequences,
+and $L^2([-\pi,\pi])$ is the space of square-integrable functions.
+\begin{block}{Theorem: Parseval's Identity}
+For every $v\in\ell^2(\mathbb{Z})$,
+\[
+\|\mathcal{F}v\|_{L^2([-\pi,\pi])}^2
+=
+\int_{-\pi}^{\pi}|\widehat v(\xi)|^2\,\dd\xi
+=
+\sum_{j\in\mathbb Z}|v_j|^2
+=
+\|v\|_{\ell^2(\mathbb{Z})}^2.
+\]
+Thus, the Fourier transform preserves the norm.
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Fourier Transform of a Basis Vector}
+
+\begin{block}{Question 2}
+Let $e_j=(0,\ldots,1,\ldots,0,\ldots)$ be the $j$th canonical basis
+vector in $\ell^2$, such that only the $j$th entry is nonzero and equals
+to $1$. Then compute $\widehat{e_j}$.
+\end{block}
+
+The entries of $e_j$ are
+\[
+(e_j)_k=\delta_{jk}
+=
+\begin{cases}
+1, & k=j,\\
+0, & k\ne j.
+\end{cases}
+\]
+By the definition of the discrete Fourier transform,
+\[
+\widehat{e_j}(\xi)
+=
+\frac{1}{\sqrt{2\pi}}
+\sum_{k\in\mathbb{Z}}(e_j)_k e^{-\ii k\xi}
+=
+\frac{e^{-\ii j\xi}}{\sqrt{2\pi}}.
+\]
+
+\end{frame}
+
+
+
+\begin{frame}{Why Use Fourier Analysis?}
+
+Let $v^j=(v_i^j)_{i\in\mathbb{Z}}$ denote the numerical solution at time
+level $j$. For $p\in\mathbb{Z}$, define the shift operator
+\[
+(\tau_p v^j)_i=v_{i+p}^j.
+\]
+A linear, constant-coefficient scheme can be written as
+\[
+v^{j+1}=\sum_p c_p\,\tau_p(v^j).
+\]
+The Fourier transform converts each shift into multiplication:
+\[
+\mathcal{F}(\tau_p v^j)(\xi)
+=e^{\ii p\xi}\widehat v^{\,j}(\xi),
+\qquad
+\widehat v^{\,j}=\mathcal{F}(v^j).
+\]
+Therefore,
+\[
+\widehat v^{\,j+1}(\xi)
+=g(\xi)\widehat v^{\,j}(\xi),
+\qquad
+g(\xi)=\sum_p c_p e^{\ii p\xi}.
+\]
+Each frequency evolves independently. By Parseval's identity, controlling $|g(\xi)|^j$ for all frequencies
+controls the $\ell^2$ norm of the solution.
+
+\end{frame}
+
+\begin{frame}{Fourier Symbols of Difference Stencils}
+
+For the Fourier mode $v_i=e^{\ii i\xi}$, the first-difference symbols are
+\[
+\begin{aligned}
+\delta_x^+ = \frac{v_{i+1}-v_i}{h}
+&\longleftrightarrow
+\frac{e^{\ii\xi}-1}{h}
+=\frac{\cos\xi-1+\ii\sin\xi}{h}
+=\frac{-2\sin^2(\xi/2)+\ii\sin\xi}{h},\\[2pt]
+\delta_x^- = \frac{v_{i}-v_{i-1}}{h}
+&\longleftrightarrow
+\frac{1-e^{-\ii\xi}}{h}
+=\frac{1-\cos\xi+\ii\sin\xi}{h}
+=\frac{2\sin^2(\xi/2)+\ii\sin\xi}{h},\\[2pt]
+\delta_x^0 = \frac{v_{i+1}-v_{i-1}}{2h}
+&\longleftrightarrow
+\frac{e^{\ii\xi}-e^{-\ii\xi}}{2h}
+=\frac{\ii\sin\xi}{h}.
+\end{aligned}
+\]
+The centered second-difference symbol is
+\[
+\delta_{xx}=\frac{v_{i-1}-2v_i+v_{i+1}}{h^2}
+\longleftrightarrow
+\frac{e^{-\ii\xi}-2+e^{\ii\xi}}{h^2}
+=
+\frac{2\cos\xi-2}{h^2}
+=
+-\frac{4\sin^2(\xi/2)}{h^2}.
+\]
+
+\end{frame}
+
+\begin{frame}{Stability and the Amplification Factor}
+
+Recall that the scheme is stable in $\|\cdot\|_{2,\Delta x}$ if there exist
+$K,\Delta x_0,\Delta t_0>0$ and $\beta\ge0$ such that
+\[
+\|v^j\|_{2,\Delta x}
+\le K e^{\beta j\Delta t}\|v^0\|_{2,\Delta x}
+\]
+for all admissible mesh sizes.
+
+\begin{block}{Theorem: Stability and Amplification Factor}
+Let $g(\xi)$ be the amplification factor of the scheme. The scheme is
+stable in $\|\cdot\|_{2,\Delta x}$ if and only if there exist
+$K,\Delta x_0,\Delta t_0>0$ and $\beta\ge0$ such that
+\[
+|g(\xi)|^j\le K e^{\beta j\Delta t},
+\qquad \forall\,\xi\in[-\pi,\pi],
+\]
+whenever $0<\Delta x\le\Delta x_0$ and
+$0<\Delta t\le\Delta t_0$.
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Amplification Bound Implies Stability}
+Let $g(\xi)$ be the amplification factor. Fourier transformation gives
+\[
+\widehat v^{\,j+1}(\xi)
+=g(\xi)\widehat v^{\,j}(\xi),
+\qquad
+\widehat v^{\,j}(\xi)
+=g(\xi)^j\widehat v^{\,0}(\xi).
+\]
+Suppose that, for all $\xi\in[-\pi,\pi]$,
+\[
+|g(\xi)|^j\le K e^{\beta jk}.
+\]
+By Parseval's identity,
+\[
+\begin{aligned}
+\|v^j\|_2^2
+=\|\widehat v^{\,j}\|_2^2\le K^2 e^{2\beta jk}\|\widehat v^{\,0}\|_2^2=K^2 e^{2\beta jk}\|v^0\|_2^2.
+\end{aligned}
+\]
+Therefore,
+\[
+\|v^j\|_2\le K e^{\beta jk}\|v^0\|_2,
+\]
+so the scheme is stable.
+
+\end{frame}
+
+
+\begin{frame}{Stability Implies the Amplification Bound}
+
+Assume the scheme is stable:
+\[
+\|v^j\|_2\le K e^{\beta jk}\|v^0\|_2.
+\]
+Using the Fourier representation and Parseval's identity,
+\[
+\int_{-\pi}^{\pi}|g(\xi)|^{2j}|\widehat v^{\,0}(\xi)|^2\,\dd\xi
+\le
+K^2e^{2\beta jk}
+\int_{-\pi}^{\pi}|\widehat v^{\,0}(\xi)|^2\,\dd\xi.
+\]
+
+Since $\widehat v^{\,0}$ can be any function in $L^2([-\pi,\pi])$,
+\[
+|g(\xi)|^j\le K e^{\beta jk}
+\quad\text{for almost every }\xi\in[-\pi,\pi].
+\]
+Because $g$ is continuous, the bound holds for every $\xi$:
+if it failed at some point, continuity would make it fail on an
+interval of positive length, contradicting the almost-everywhere bound.
+\end{frame}
+
+
+
+
+
+
+
+
+\section[Parabolic]{Parabolic Equation}
+\begin{frame}{Question 4}
+\begin{block}{Parabolic Problem}
+Consider
+\[
+u_t=u_{xx}-u_x,\qquad 0<x<1,\quad 0<t\le1,
+\]
+with boundary and initial conditions
+\[
+u(0,t)=u(1,t)=0,\qquad 0\le t\le1,
+\qquad
+u(x,0)=f(x),\quad 0<x<1.
+\]
+\end{block}
+Let $x_i=ih$, $t_j=j\Delta t$, with $h=1/n$ and $\Delta t=1/m$.
+The scheme uses Crank--Nicolson for diffusion and an explicit centered
+difference for the advection term:
+\[
+\begin{aligned}
+U_i^{j+1}-U_i^j
+={}&\frac{\Delta t}{2h^2}
+\Big[
+U_{i-1}^{j+1}-2U_i^{j+1}+U_{i+1}^{j+1}
++U_{i-1}^{j}-2U_i^{j}+U_{i+1}^{j}
+\Big]\\
+&-\frac{\Delta t}{2h}
+\Big[
+U_{i+1}^{j}-U_{i-1}^{j}
+\Big],
+\end{aligned}
+\]
+for $j=0,\ldots,m-1$ and $i=1,\ldots,n-1$.
+
+\end{frame}
+
+
+\begin{frame}{Q4(a): Matrix Form}
+Let $U^j=(U_1^j,\ldots,U_{n-1}^j)^\mathsf{T}$. Define
+\[
+B=\frac{1}{h^2}
+\begin{pmatrix}
+-2&1\\
+1&-2&1\\
+&\ddots&\ddots&\ddots\\
+&&1&-2&1\\
+&&&1&-2
+\end{pmatrix},
+\qquad
+C=\frac{1}{2h}
+\begin{pmatrix}
+0&1\\
+-1&0&1\\
+&\ddots&\ddots&\ddots\\
+&&-1&0&1\\
+&&&-1&0
+\end{pmatrix}.
+\]
+These represent the centered difference approximations of $u_{xx}$ and
+$u_x$, respectively. Since the boundary values are zero, the scheme is
+\[
+\frac{U^{j+1}-U^j}{k}
+=
+\frac12B(U^{j+1}+U^j)-CU^j.
+\]
+
+Collecting the new-time terms gives
+\[
+\boxed{
+\left(I-\frac{k}{2}B\right)U^{j+1}
+=
+\left(I+\frac{k}{2}B-kC\right)U^j.
+}
+\]
+\end{frame}
+
+\begin{frame}{Q4(b): Local Truncation Error}
+Assume
+\[
+u\in C^{4,3}\bigl([0,1]\times[0,1]\bigr),
+\qquad
+u_{i,j}:=u(x_i,t_j).
+\]
+Define the centered spatial differences
+\[
+\delta_x u_{i,j}
+:=\frac{u_{i+1,j}-u_{i-1,j}}{2h},
+\qquad
+\delta_{xx}u_{i,j}
+:=\frac{u_{i-1,j}-2u_{i,j}+u_{i+1,j}}{h^2}.
+\]
+
+The local truncation error at $(x_i,t_j)$ is
+\[
+\mathcal{T}_{i,j}
+=
+\frac{u_{i,j+1}-u_{i,j}}{\Delta t}
+-\frac12\left(\delta_{xx}u_{i,j+1}+\delta_{xx}u_{i,j}\right)
++\delta_xu_{i,j}.
+\]
+    
+\end{frame}
+
+
+\begin{frame}{Q4(b): Local Truncation Error (cont'd)}
+Taylor expansion gives
+\[
+\frac{u_{i,j+1}-u_{i,j}}{k}
+=
+u_\tau+\frac{k}{2}u_{\tau\tau}+O(k^2),
+\]
+\[
+\frac12\left(\delta_{xx}u_{i,j+1}+\delta_{xx}u_{i,j}\right)
+=
+u_{xx}+\frac{k}{2}u_{xx\tau}+O(h^2)+O(k^2),
+\]
+and
+\[
+\delta_xu_{i,j}=u_x+O(h^2),
+\]
+where the derivatives are evaluated at $(x_i,\tau_j)$. Hence,
+\[
+\mathcal{T}_{i,j}
+=
+u_\tau-u_{xx}+u_x
++\frac{k}{2}\left(u_{\tau\tau}-u_{xx\tau}\right)
++O(h^2)+O(k^2).
+\]
+\end{frame}
+
+\begin{frame}{Q4(b): Local Truncation Error (cont'd)}
+Using $u_\tau=u_{xx}-u_x$ and differentiating in $\tau$,
+\[
+u_{\tau\tau}=u_{xx\tau}-u_{x\tau}.
+\]
+Therefore,
+\[
+\mathcal{T}_{i,j}
+=
+-\frac{k}{2}u_{x\tau}+O(h^2)+O(k^2)
+=
+O(h^2)+O(k).
+\]
+\end{frame}
+
+
+\begin{frame}{Q4(c): Consistency and Order of Accuracy}
+
+From the truncation error estimate,
+\[
+\mathcal{T}_{i,j}=O(h^2)+O(k).
+\]
+Thus,
+\[
+\mathcal{T}_{i,j}\longrightarrow 0
+\qquad\text{as }h,k\longrightarrow0,
+\]
+so the scheme is consistent.
+\begin{block}{Conclusion}
+The scheme is consistent with order $(2,1)$: second-order accurate
+in space and first-order accurate in time.
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{Q4(d): Determine the Stability Condition}
+
+To analyze stability, consider one Fourier mode
+\[
+U_i^j=\widehat U^{\,j}(\xi)e^{\mathrm{i}i\xi},
+\qquad \mathrm{i}=\sqrt{-1}.
+\]
+A shift by one grid point gives
+\[
+U_{i+1}^j=e^{\mathrm{i}\xi}U_i^j,
+\qquad
+U_{i-1}^j=e^{-\mathrm{i}\xi}U_i^j.
+\]
+
+For the centered second difference,
+\[
+(BU^j)_i
+=
+\frac{U_{i-1}^j-2U_i^j+U_{i+1}^j}{h^2}
+=
+\underbrace{\frac{e^{-\mathrm{i}\xi}-2+e^{\mathrm{i}\xi}}{h^2}}_{\widehat B(\xi)}
+U_i^j, \quad \widehat B(\xi)=-\frac{4}{h^2}\sin^2\frac{\xi}{2}.
+\]
+For the centered first difference,
+\[
+(CU^j)_i
+=
+\frac{U_{i+1}^j-U_{i-1}^j}{2h}
+=
+\underbrace{\frac{e^{\mathrm{i}\xi}-e^{-\mathrm{i}\xi}}{2h}}_{\widehat C(\xi)}
+U_i^j,
+\qquad
+\widehat C(\xi)=\frac{\mathrm{i}\sin\xi}{h}.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Q4(d): Determine the Stability Condition (cont'd)}
+
+The matrix scheme is
+\[
+\left(I-\frac{k}{2}B\right)U^{j+1}
+=
+\left(I+\frac{k}{2}B-kC\right)U^j.
+\]
+
+For a Fourier mode, $U_i^{j+1}=g(\xi)U_i^j$. Using the symbols of
+$B$ and $C$,
+\[
+\left(1+2\frac{k}{h^2}\sin^2\frac{\xi}{2}\right)g(\xi)
+=
+1-2\frac{k}{h^2}\sin^2\frac{\xi}{2}
+-\mathrm{i}\frac{k}{h}\sin\xi.
+\]
+
+Therefore, the amplification factor is
+\[
+g(\xi)=
+\frac{1-2\frac{k}{h^2}\sin^2\frac{\xi}{2}
+-\mathrm{i}\frac{k}{h}\sin\xi}
+{1+2\frac{k}{h^2}\sin^2\frac{\xi}{2}}.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Q4(d): Determine the Stability Condition (cont'd)}
+
+The scheme is stable if $|g(\xi)|\le1$ for all $\xi\in[-\pi,\pi]$.
+Using the amplification factor,
+\[
+|g(\xi)|^2
+=
+\frac{
+\left(1-2\frac{k}{h^2}\sin^2\frac{\xi}{2}\right)^2
++\left(\frac{k}{h}\sin\xi\right)^2
+}{
+\left(1+2\frac{k}{h^2}\sin^2\frac{\xi}{2}\right)^2
+}.
+\]
+
+Thus, $|g(\xi)|\le1$ is equivalent to
+\[
+\left(\frac{k}{h}\sin\xi\right)^2
+\le 8\frac{k}{h^2}\sin^2\frac{\xi}{2},
+\]
+which reduces to
+\[
+k\cos^2\frac{\xi}{2}\le2.
+\]
+
+Since $\max_{\xi\in[-\pi,\pi]}\cos^2(\xi/2)=1$, the stability condition is
+\[
+\boxed{k\le2.}
+\]
+
+\end{frame}
+
+
+\section[Numerical]{Numerical Example}
+
+\begin{frame}{Question 5}
+
+Consider a European call option with strike $K$ and expiry $T$. The
+underlying asset follows the geometric Brownian motion
+\[
+\dd S_t=\mu S_t\,\dd t+\sigma S_t\,\dd W_t,
+\]
+and the risk-free interest rate is $r$. Use the parameters
+\[
+S_0=K=100,\qquad r=0.05,\qquad \sigma=0.15,\qquad T=1.
+\]
+
+After transforming to log-price and time-to-expiry coordinates, the
+Black--Scholes equation is
+\[
+V_\tau=\frac12\sigma^2V_{xx}+\nu V_x-rV,
+\qquad
+\nu=r-\frac12\sigma^2,
+\qquad (x,\tau)\in\mathbb{R}\times[0,T].
+\]
+The initial condition is
+\[
+V(x,0)=(e^x-K)^+.
+\]
+\end{frame}
+
+\begin{frame}{Q5(a): Local Truncation Error and Convergent Rate}
+
+The scheme uses a forward difference in time and centered differences
+in space:
+\[
+\frac{V_i^{j+1}-V_i^j}{k}
+=
+\frac{\sigma^2}{2}
+\frac{V_{i-1}^j-2V_i^j+V_{i+1}^j}{h^2}
++\nu\frac{V_{i+1}^j-V_{i-1}^j}{2h}
+-rV_i^{j+1}.
+\]
+Define
+\[
+\rho:=\frac{\sigma^2 k}{2h^2},\qquad
+p_u:=\rho\left(1+\frac{\nu h}{\sigma^2}\right),\quad
+p_0:=1-2\rho,\quad
+p_d:=\rho\left(1-\frac{\nu h}{\sigma^2}\right).
+\]
+Then the scheme becomes
+\[
+V_i^{j+1}
+=
+\frac{p_dV_{i-1}^j+p_0V_i^j+p_uV_{i+1}^j}{1+rk}.
+\]
+    
+\end{frame}
+
+\begin{frame}{Q5(a): Local Truncation Error and Convergent Rate (cont'd)}
+
+Substitute the exact solution into the scheme and write
+\[
+V_{i,j}:=V(x_i,\tau_j).
+\]
+Define the centered difference approximations
+\[
+\delta_x V_{i,j}
+:=\frac{V_{i+1,j}-V_{i-1,j}}{2h},
+\qquad
+\delta_{xx}V_{i,j}
+:=\frac{V_{i-1,j}-2V_{i,j}+V_{i+1,j}}{h^2}.
+\]
+
+The local truncation error at $(x_i,\tau_j)$ is
+\[
+\mathcal{T}_{i,j}
+=
+\frac{V_{i,j+1}-V_{i,j}}{k}
+-\frac{\sigma^2}{2}\delta_{xx}V_{i,j}
+-\nu\delta_xV_{i,j}
++rV_{i,j+1}.
+\]
+
+\end{frame}
+
+\begin{frame}{Q5(a): Local Truncation Error and Convergent Rate (cont'd)}
+
+Assume $V$ is sufficiently smooth for $\tau>0$, with the required
+derivatives bounded. At $(x_i,\tau_j)$,
+\[
+\frac{V_{i,j+1}-V_{i,j}}{k}
+=
+V_\tau+\frac{k}{2}V_{\tau\tau}+O(k^2).
+\]
+
+The centered differences satisfy
+\[
+\delta_{xx}V_{i,j}=V_{xx}+O(h^2),
+\qquad
+\delta_xV_{i,j}=V_x+O(h^2).
+\]
+
+The discount term at the new time level satisfies
+\[
+V_{i,j+1}=V+kV_\tau+O(k^2).
+\]
+
+All derivatives are evaluated at $(x_i,\tau_j)$.
+
+\end{frame}
+
+
+\begin{frame}{Q5(a): Local Truncation Error and Convergent Rate (cont'd)}
+
+All derivatives are evaluated at $(x_i,\tau_j)$. Substituting the
+Taylor expansions into $\mathcal{T}_{i,j}$ gives
+\[
+\begin{aligned}
+\mathcal{T}_{i,j}
+={}&
+\underbrace{V_\tau-\frac{\sigma^2}{2}V_{xx}-\nu V_x+rV}_{=\,0\text{ by the PDE}}\\
+&+k\left(\frac12V_{\tau\tau}+rV_\tau\right)
++O(h^2)+O(k^2).
+\end{aligned}
+\]
+
+Since $V$ satisfies the Black--Scholes PDE, the leading terms cancel.
+Assuming the required derivatives are bounded,
+\[
+\boxed{\mathcal{T}_{i,j}=O(h^2)+O(k).}
+\]
+
+\end{frame}
+
+
+\begin{frame}{Q5(b): Boundary Conditions and Grid Parameters}
+
+For the truncated domain $[-1,5]\times[0,1]$, impose
+\[
+V(-1,\tau)=0,
+\qquad
+V(5,\tau)=e^5-Ke^{-r\tau}.
+\]
+
+With $h=0.01$ and $k=1/225$,
+\[
+\sigma\sqrt{k}=h,
+\qquad
+h<\frac{\sigma^2}{\nu}\approx0.58065.
+\]
+Thus, condition (3.9) is satisfied. The scheme coefficients are
+\[
+\rho=\frac12,\qquad
+p_u\approx0.5086111,\quad
+p_0=0,\quad
+p_d\approx0.4913889.
+\]
+
+Starting from $V(x,0)=(e^x-K)^+$, advance the scheme to $\tau=1$
+and interpolate at $x=\ln100$:
+\[
+\boxed{V(\ln100,1)\approx8.59764062.}
+\]
+
+\end{frame}
+
+
+\begin{frame}{Q5(c): Enlarged Computational Domain}
+
+Enlarge the domain to $[-2,10]\times[0,1]$. The boundary conditions are
+\[
+V(-2,\tau)=0,
+\qquad
+V(10,\tau)=e^{10}-Ke^{-r\tau}.
+\]
+
+Using the same $h=0.01$ and $k=1/225$, advance the scheme from
+$V(x,0)=(e^x-K)^+$ to $\tau=1$, then interpolate at $x=\ln100$:
+\[
+\boxed{V(\ln100,1)\approx8.59763953.}
+\]
+
+The two domain choices give
+\[
+\left|8.59764062-8.59763953\right|
+\approx1.10\times10^{-6}.
+\]
+Thus, for this grid, enlarging the computational domain has a negligible
+effect on the computed option value.
+
+\end{frame}
+
+
+
+
+\begin{frame}\vfill\begin{center}{\LARGE Thank You! Questions?}\end{center}\vfill\end{frame}
+\end{document}

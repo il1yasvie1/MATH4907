@@ -1,0 +1,1535 @@
+\documentclass{beamer}
+\usepackage{xcolor}
+\usepackage{graphicx, subcaption}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{listings}
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red!70!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible
+}
+\usetikzlibrary{trees,arrows.meta,positioning}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{MATH4907 Tutorial 2}
+\author{Sanyang Liu}
+\usetheme{Boadilla}
+\useoutertheme{miniframes}
+\setbeamertemplate{navigation symbols}{}
+
+\newcommand{\bE}{\mathbb{E}}
+\newcommand{\bQ}{\mathbb{Q}}
+\newcommand{\bP}{\mathbb{P}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\order}{\mathcal{O}}
+\newcommand{\cT}{\mathcal{T}}
+
+\begin{document}
+\AtBeginSection[]
+{
+    \begin{frame}{Table of Contents}
+        \tableofcontents[
+            currentsection,
+            hideallsubsections
+        ]
+    \end{frame}
+}
+\maketitle
+
+\begin{frame}{Personal Information}
+\begin{itemize}
+    \item TA: Sanyang Liu
+    \item Office: Room 320A Run Run Shaw Building (Email me first)
+    \item Email: u3013241@connect.hku.hk
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Table of Contents}
+    \tableofcontents[]
+\end{frame}
+
+\section[A2Q1]{From Black--Scholes to Heat Equation}
+
+\begin{frame}{Black--Scholes (BS) Equation}
+Suppose we want to solve the BS equation for a European call option:
+\[
+\begin{cases}
+V_t+\dfrac{1}{2}\sigma^2S^2V_{SS}
++rSV_S-rV=0,
+& \forall (S,t)\in(0,\infty)\times[0,T),\\[0.25cm]
+V(S,T)=(S-K)^+,
+& \forall S\in(0,\infty),\\[0.25cm]
+V(0,t)=0,
+& \forall t\in[0,T),\\[0.25cm]
+V(S,t)\sim S-Ke^{-r(T-t)},
+& \text{as } S\to\infty,   \forall t\in[0,T).
+\end{cases}
+\]
+\begin{block}{Numerical challenges}
+\begin{enumerate}
+    \item Backward in time.
+    \item Coefficients depend on \(S\).
+    \item Lower-order terms \(rSV_S\) and \(-rV\).
+    \item Unbounded spatial domain.
+\end{enumerate}
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Changes of Variables}
+\footnotesize
+\[
+R(\tau_1)=\int_0^{\tau_1}r(s)\,ds,
+\qquad
+B(\tau_1)=\int_0^{\tau_1}
+\left(r(s)-\frac12\sigma^2(s)\right)\,ds.
+\]
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{p{0.27\textwidth}
+                p{0.23\textwidth}
+                p{0.45\textwidth}}
+\toprule
+\textbf{Motivation}
+&
+\textbf{Change of Variable}
+&
+\textbf{Equation}
+\\
+\midrule
+Time reversal\\
+backward $\to$ forward
+&
+$\tau_1=T-t$
+&
+$-V_{\tau_1}
++\frac12\sigma^2\textcolor{red}{S^2}V_{SS}
++rSV_S-rV=0$
+\\[0.02cm]
+
+Log transform\\
+remove $S^2$
+&
+$y=\log S$
+&
+$-U_{\tau_1}
++\frac12\sigma^2U_{yy}
++\left(r-\frac12\sigma^2\right)U_y-r\textcolor{red}{U}=0$
+\\[0.02cm]
+
+Integrating factor\\
+remove $U$
+&
+$v=e^{R(\tau_1)}U$
+&
+$-v_{\tau_1}
++\frac12\sigma^2v_{yy}
++\textcolor{red}{\left(r-\frac12\sigma^2\right)v_y}=0$
+\\[0.02cm]
+
+Moving coordinate\\
+remove $v_y$
+&
+$x=y+B(\tau_1)$
+&
+$u_{\tau_1}=\textcolor{red}{\frac12\sigma^2}u_{xx}$
+\\[0.02cm]
+
+Time scaling\\
+normalise diffusion
+&
+$\displaystyle
+\tau=\frac12\int_0^{\tau_1}\sigma^2(s)\,ds$
+&
+$u_\tau=u_{xx}$
+\\
+
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Why Log Transform?}
+
+The diffusion term in the Black--Scholes equation is $\frac{1}{2}\sigma^2S^2V_{SS}.$ To remove the \(S\)-dependence, assume a spatial transformation
+\[
+y=\phi(S),
+\qquad
+V(S,\tau)=U(y,\tau).
+\]
+By the chain rule,
+\[
+V_{SS}
+=
+U_{yy}\bigl(\phi'(S)\bigr)^2
++
+U_y\phi''(S).
+\]
+Hence, the coefficient of \(U_{yy}\) becomes $\frac{1}{2}\sigma^2S^2\bigl(\phi'(S)\bigr)^2.$
+We choose \(\phi\) such that $S^2\bigl(\phi'(S)\bigr)^2$ is independent of \(S\). Therefore,
+\[
+\phi'(S)\propto\frac{1}{S},
+\qquad
+\phi(S)=\log S
+\]
+up to an affine transformation. Thus we choose
+\[
+\boxed{y=\log S}.
+\]
+\end{frame}
+
+\begin{frame}{Why Integrating Factor?}
+After the time reversal and log transform, we obtain
+\[
+- U_{\tau_1}\textcolor{gray}{+
+\frac{1}{2}\sigma^2U_{yy}
++
+\left(r-\frac{1}{2}\sigma^2\right)U_y}
+-rU=0.
+\]
+The zeroth-order term \(-rU\) is proportional to the unknown function.
+To remove it without changing the spatial derivative terms, we try
+\[
+\phi(\tau_1)U(y,\tau_1)=v(y,\tau_1),
+\]
+where \(\phi\) is the integrating factor
+\[
+\boxed{
+\phi(\tau_1)
+=
+\exp\left(\int_0^{\tau_1}r(s)\,ds\right)}.
+\]
+\end{frame}
+
+
+\begin{frame}{Why Moving Coordinates?}
+
+After removing the zeroth-order term, we obtain
+\[
+-v_{\tau_1}
+\textcolor{gray}{+\frac{1}{2}\sigma^2v_{yy}
+}+\left(r-\frac{1}{2}\sigma^2\right)v_y=0.
+\]
+For a transport equation, the solution moves along characteristics.
+Therefore, introduce a moving coordinate
+\[
+x=y+B(\tau_1),
+\qquad
+B'=r-\frac{1}{2}\sigma^2.
+\]
+Write
+\[
+v(y,\tau_1)=u(x,\tau_1).
+\]
+Then
+\[
+v_{\tau_1}=u_{\tau_1}+B'(\tau_1)u_x,
+\qquad
+v_y=u_x,
+\qquad
+v_{yy}=u_{xx}.
+\]
+Therefore,
+\[
+u_{\tau_1}
+=
+\frac{1}{2}\sigma^2u_{xx}.
+\]
+\end{frame}
+
+
+
+
+\section[A2Q2]{Finite Difference in 1-Dimensional}
+
+\begin{frame}{1-Dimensional Stencil}
+Suppose we want to approximate the \(m\)-th derivative \(f^{(m)}(x)\)
+using the grid points
+\[
+x+\alpha_j h,\qquad j=1,\ldots,N.
+\]
+We seek coefficients \(c_j\) such that
+\[
+D_h f(x)
+=
+\frac{1}{h^m}
+\sum_{j=1}^{N}
+c_j f(x+\alpha_j h)
+\]
+approximates \(f^{(m)}(x)\) with a prescribed order. The point locations \(\{\alpha_j\}\) and coefficients \(\{c_j\}\)
+together define \textcolor{blue}{a finite-difference stencil}.
+\begin{block}{Questions}
+How many points? Where should they be? Which coefficients?
+What order of accuracy is possible?
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Taylor Expansion at Stencil Points}
+Expand each value at the stencil point around \(x\):
+\[
+f(x+\alpha_j h)
+=
+\sum_{\ell\ge 0}
+\frac{(\alpha_j h)^\ell}{\ell!}
+f^{(\ell)}(x).
+\]
+Substituting these expansions into the definition of \(D_h f(x)\) gives
+\[
+D_h f(x)
+=
+\sum_{\ell\ge 0}
+\frac{h^{\ell-m}}{\ell!}
+\left(
+\sum_{j=1}^{N}c_j\alpha_j^\ell
+\right)
+f^{(\ell)}(x).
+\]
+Define the moments of the stencil by
+\[
+M_\ell
+:=
+\sum_{j=1}^{N}c_j\alpha_j^\ell, \text{ then } D_h f(x)
+=
+\sum_{\ell\ge 0}
+\frac{h^{\ell-m}}{\ell!}
+M_\ell f^{(\ell)}(x).
+\]
+
+\end{frame}
+
+\begin{frame}{Conditions for an Approximation of Order \(p\)}
+
+To approximate \(f^{(m)}(x)\), the stencil coefficients must satisfy
+\[
+M_\ell=0,
+\qquad \ell=0,\ldots,m-1,
+\]
+and
+\[
+M_m=m!.
+\]
+The first nonzero moment after \(M_m\) determines the order of accuracy.
+If
+\[
+M_{m+1}=\cdots=M_{m+p-1}=0,
+\qquad
+M_{m+p}\neq 0,
+\]
+then
+\[
+D_hf(x)
+=
+f^{(m)}(x)
++
+\frac{M_{m+p}}{(m+p)!}
+h^p f^{(m+p)}(x)
++
+O(h^{p+1}).
+\]
+Therefore, the finite-difference stencil has order of accuracy \(p\).
+
+\end{frame}
+
+\begin{frame}{The Coefficient-Matching Linear System}
+
+For a chosen stencil, let
+\[
+\boldsymbol{c}
+=
+(c_1,\ldots,c_N)^T.
+\]
+
+The first \(m+1\) moment conditions give
+\[
+V\boldsymbol{c}
+=
+\boldsymbol{b},
+\qquad
+V\in\mathbb{R}^{(m+1)\times N},
+\]
+where
+\[
+V=
+\begin{pmatrix}
+1&\cdots&1\\
+\alpha_1&\cdots&\alpha_N\\
+\vdots&&\vdots\\
+\alpha_1^m&\cdots&\alpha_N^m
+\end{pmatrix},
+\qquad
+\boldsymbol{b}
+=
+\begin{pmatrix}
+0\\
+\vdots\\
+0\\
+m!
+\end{pmatrix}.
+\]
+The matrix \(V\) is a generalized Vandermonde matrix.
+\begin{itemize}
+    \item The stencil locations determine \(V\).
+    \item The derivative order determines \(\boldsymbol{b}\).
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Example (A2Q2): Setting the Stencil}
+
+We want to approximate the second derivative \(f''(x)\).
+
+Thus,
+\[
+m=2.
+\]
+
+Choose the symmetric three-point stencil
+\[
+\alpha=(-1,0,1),
+\]
+corresponding to
+\[
+x-h,\qquad x,\qquad x+h.
+\]
+
+Define
+\[
+D_hf(x)
+=
+\frac{1}{h^2}
+\left[
+c_{-1}f(x-h)
++c_0f(x)
++c_1f(x+h)
+\right].
+\]
+
+The coefficients \(c_{-1},c_0,c_1\) are determined by
+\[
+M_0=0,\qquad M_1=0,\qquad M_2=2.
+\]
+
+\end{frame}
+
+\begin{frame}{Example (A2Q2): Solving for the Coefficients}
+
+The moment conditions give
+\[
+\begin{pmatrix}
+1&1&1\\
+-1&0&1\\
+1&0&1
+\end{pmatrix}
+\begin{pmatrix}
+c_{-1}\\c_0\\c_1
+\end{pmatrix}
+=
+\begin{pmatrix}
+0\\0\\2
+\end{pmatrix}.
+\]
+
+Solving the linear system gives
+\[
+(c_{-1},c_0,c_1)=(1,-2,1).
+\]
+
+Therefore,
+\[
+D_hf(x)
+=
+\frac{
+f(x-h)-2f(x)+f(x+h)
+}{h^2}.
+\]
+
+\end{frame}
+
+\begin{frame}{Example (A2Q2): Moments and Order of Accuracy}
+
+For
+\[
+(c_{-1},c_0,c_1)=(1,-2,1),
+\]
+the relevant moments are
+\[
+M_0 =M_1=0, \,M_2=2,\, M_3=c_{-1}(-1)^3 + c_0 0^3 + c_1 1^3 = 0, \,M_4=2\neq0.
+\]
+Hence,
+\[
+D_hf(x)
+=
+\frac{M_2}{2!}f''(x)
++
+\frac{M_4}{4!}h^2f^{(4)}(x)
++
+O(h^4).
+\]
+
+Therefore,
+\[
+D_hf(x)
+=
+f''(x)
++\frac{1}{12}h^2f^{(4)}(x)
++O(h^4),
+\]
+and
+\[
+\boxed{
+D_hf(x)=f''(x)+O(h^2).
+}
+\]
+\end{frame}
+
+\begin{frame}{A Systematic Procedure: 1D}
+
+\small
+\setlength{\itemsep}{2pt}
+
+\begin{enumerate}
+    \item Specify the target derivative order \(m\).
+
+    \item Choose \(N\geq m+1\) distinct stencil locations
+    \[
+    (\alpha_1,\ldots,\alpha_N).
+    \]
+
+    \item Construct
+    \[
+    V\in\mathbb{R}^{N\times N},
+    \qquad
+    V_{ij}=\alpha_j^{\,i-1},
+    \]
+    and
+    \[
+    \boldsymbol b\in\mathbb{R}^N,
+    \qquad
+    b_i=m!\,\delta_{i,m+1}.
+    \]
+
+    \item Solve
+    \[
+    V\boldsymbol c=\boldsymbol b,
+    \qquad
+    \boldsymbol c\in\mathbb{R}^N.
+    \]
+
+    \item Compute
+    \[
+    M_\ell=\sum_{j=1}^N c_j\alpha_j^\ell,
+    \qquad
+    \ell=m+1,m+2,\ldots
+    \]
+
+    \item Find the first nonzero moment after \(M_m\), and determine
+    the order of accuracy from the corresponding truncation error term.
+\end{enumerate}
+\end{frame}
+
+
+
+\section[A2Q3]{Finite Difference in d-Dimensional}
+\begin{frame}{Multi-Index Notation}
+Let
+\[
+\boldsymbol{\alpha}
+=
+(\alpha_1,\ldots,\alpha_d)
+\in\mathbb{N}_0^d
+\]
+denote the target derivative
+\[
+D^{\boldsymbol{\alpha}}f
+=
+\frac{\partial^{|\boldsymbol{\alpha}|}f}
+{\partial x_1^{\alpha_1}\cdots\partial x_d^{\alpha_d}},
+\]
+where
+\[
+|\boldsymbol{\alpha}|
+=
+\alpha_1+\cdots+\alpha_d.
+\]
+For a multi-index \(\boldsymbol{\beta}=(\beta_1, \beta_2, \ldots, \beta_d)\), define
+\[
+\boldsymbol{\beta}!
+=
+\beta_1!\cdots\beta_d!,
+\qquad
+\boldsymbol{\xi}^{\boldsymbol{\beta}}
+=
+\prod_{i=1}^d \xi_i^{\beta_i}.
+\]
+\end{frame}
+
+\begin{frame}{Multi-Dimensional Stencil}
+Choose stencil points
+\[
+\boldsymbol{\xi}_j\in\mathbb{R}^d,
+\qquad j=1,\ldots,N,
+\]
+and coefficients
+\[
+\boldsymbol{c}
+=
+(c_1,\ldots,c_N)^T.
+\]
+
+We define
+\[
+D_hf(\boldsymbol{x})
+=
+\frac{1}{h^{|\boldsymbol{\alpha}|}}
+\sum_{j=1}^N
+c_j f(\boldsymbol{x}+h\boldsymbol{\xi}_j).
+\]
+
+The point locations \(\boldsymbol{\xi}_j\) and coefficients \(c_j\)
+define the multi-dimensional stencil.
+\end{frame}
+
+
+\begin{frame}{Multi-Index Taylor Expansion}
+For each stencil point,
+\[
+f(\boldsymbol{x}+h\boldsymbol{\xi}_j)
+=
+\sum_{\boldsymbol{\beta}\in\mathbb{N}_0^d}
+\frac{h^{|\boldsymbol{\beta}|}}
+{\boldsymbol{\beta}!}
+\boldsymbol{\xi}_j^{\boldsymbol{\beta}}
+D^{\boldsymbol{\beta}}f(\boldsymbol{x}).
+\]
+
+Substituting into \(D_hf\) gives
+\[
+D_hf(\boldsymbol{x})
+=
+\sum_{\boldsymbol{\beta}}
+\frac{h^{|\boldsymbol{\beta}|-|\boldsymbol{\alpha}|}}
+{\boldsymbol{\beta}!}
+M_{\boldsymbol{\beta}}
+D^{\boldsymbol{\beta}}f(\boldsymbol{x}),
+\]
+where the multi-dimensional moments are
+\[
+M_{\boldsymbol{\beta}}
+=
+\sum_{j=1}^N
+c_j\boldsymbol{\xi}_j^{\boldsymbol{\beta}}.
+\]
+\end{frame}
+
+\begin{frame}{Moment Conditions in Multiple Dimensions}
+
+To approximate \(D^{\boldsymbol{\alpha}}f\) with order \(p\), require
+\[
+M_{\boldsymbol{\beta}}
+=
+\begin{cases}
+\boldsymbol{\alpha}!,
+&
+\boldsymbol{\beta}=\boldsymbol{\alpha},\\
+0,
+&
+\boldsymbol{\beta}\neq\boldsymbol{\alpha},
+\end{cases}
+\]
+for all multi-indices satisfying
+\[
+|\boldsymbol{\beta}|
+\leq
+|\boldsymbol{\alpha}|+p-1.
+\]
+
+The first nonzero moments after this range determine the
+leading truncation error. Equivalently,
+\[
+D_hf(\boldsymbol{x})
+=
+D^{\boldsymbol{\alpha}}f(\boldsymbol{x})
++
+O(h^p).
+\]
+\end{frame}
+
+\begin{frame}{The Multivariate Vandermonde Matrix}
+
+Choose multi-indices
+\[
+\boldsymbol{\beta}^{(1)},\ldots,\boldsymbol{\beta}^{(M)}
+\]
+and stencil points
+\[
+\boldsymbol{\xi}_1,\ldots,\boldsymbol{\xi}_N.
+\]
+The coefficient-matching system is
+\[
+V\boldsymbol{c}=\boldsymbol{b},
+\]
+where
+\[
+V=
+\begin{pmatrix}
+\boldsymbol{\xi}_1^{\boldsymbol{\beta}^{(1)}}&
+\cdots&
+\boldsymbol{\xi}_N^{\boldsymbol{\beta}^{(1)}}\\
+\boldsymbol{\xi}_1^{\boldsymbol{\beta}^{(2)}}&
+\cdots&
+\boldsymbol{\xi}_N^{\boldsymbol{\beta}^{(2)}}\\
+\vdots&&\vdots\\
+\boldsymbol{\xi}_1^{\boldsymbol{\beta}^{(M)}}&
+\cdots&
+\boldsymbol{\xi}_N^{\boldsymbol{\beta}^{(M)}}
+\end{pmatrix}
+\in\mathbb{R}^{M\times N}.
+\]
+\end{frame}
+
+\begin{frame}{Example (A2Q3): Approximate $f_{xy}$}
+For A2Q3, the target derivative is
+\[
+D^{\boldsymbol{\alpha}}f=f_{xy},
+\qquad
+\boldsymbol{\alpha}=(1,1).
+\]
+
+Choose the four stencil points
+\[
+\boldsymbol{\xi}_1=(1,1),\quad
+\boldsymbol{\xi}_2=(1,-1),\quad
+\boldsymbol{\xi}_3=(-1,1),\quad
+\boldsymbol{\xi}_4=(-1,-1).
+\]
+
+Use the multi-indices
+\[
+\boldsymbol{\beta}^{(1)}=(0,0),\quad
+\boldsymbol{\beta}^{(2)}=(1,0),\quad
+\boldsymbol{\beta}^{(3)}=(0,1),\quad
+\boldsymbol{\beta}^{(4)}=(1,1).
+\]
+
+The matrix entries are defined by
+\[
+V_{ij}
+=
+\boldsymbol{\xi}_j^{\boldsymbol{\beta}^{(i)}}
+=
+(\xi_{j,1})^{\beta^{(i)}_1}
+(\xi_{j,2})^{\beta^{(i)}_2}.
+\]
+
+For example,
+\[
+V_{2,1}
+=
+\boldsymbol{\xi}_1^{(1,0)}
+=
+1^1\,1^0=1.
+\]
+\end{frame}
+
+\begin{frame}{Example (A2Q3): The Coefficient-Matching System}
+Using $V_{ij}
+=
+\boldsymbol{\xi}_j^{\boldsymbol{\beta}^{(i)}}$, we obtain
+\[
+V=
+\begin{pmatrix}
+1&1&1&1\\
+1&1&-1&-1\\
+1&-1&1&-1\\
+1&-1&-1&1
+\end{pmatrix}.
+\]
+
+The moment conditions are
+\[
+V\boldsymbol{c}=\boldsymbol{b},
+\qquad
+b_i
+=
+\boldsymbol{\alpha}!\,
+\delta_{\boldsymbol{\beta}^{(i)},\boldsymbol{\alpha}}.
+\]
+Thus,
+\[
+\begin{cases}
+c_1+c_2+c_3+c_4=0,\\
+c_1+c_2-c_3-c_4=0,\\
+c_1-c_2+c_3-c_4=0,\\
+c_1-c_2-c_3+c_4=1.
+\end{cases}
+\]
+\end{frame}
+
+
+\begin{frame}{Example (A2Q3): Coefficients and Accuracy}
+
+Solving the linear system gives
+\[
+(c_1,c_2,c_3,c_4)
+=
+\left(
+\frac14,-\frac14,-\frac14,\frac14
+\right).
+\]
+Therefore,
+\[
+\begin{aligned}
+&D_{h,k}f(x,y)\\
+&=
+\frac{
+f(x+h,y+k)-f(x+h,y-k)
+-f(x-h,y+k)+f(x-h,y-k)
+}{4hk}.   
+\end{aligned}
+\]
+The first neglected Taylor terms are of order
+\[
+O(h^2)+O(k^2).
+\]
+Hence,
+\[
+\boxed{
+D_{h,k}f(x,y)
+=
+f_{xy}(x,y)+O(h^2+k^2).
+}
+\]
+\end{frame}
+
+\begin{frame}{A Systematic Procedure: 2D}
+
+\small
+\setlength{\itemsep}{2pt}
+
+\begin{enumerate}
+    \item Specify the target multi-index $\boldsymbol{\alpha}=(\alpha_1,\alpha_2).$
+    \item Choose \(N\) stencil points
+    \[
+    \boldsymbol{\xi}_j
+    =
+    (\xi_{j,1},\xi_{j,2})
+    \in\mathbb{R}^2,
+    \qquad j=1,\ldots,N.
+    \]
+
+    \item Choose \(N\) multi-indices $\boldsymbol{\beta}^{(1)},\ldots,
+    \boldsymbol{\beta}^{(N)}$ and construct
+    \[
+    V\in\mathbb{R}^{N\times N},
+    \qquad
+    V_{ij}
+    =
+    \boldsymbol{\xi}_j^{\boldsymbol{\beta}^{(i)}}
+    =
+    \xi_{j,1}^{\beta^{(i)}_1}
+    \xi_{j,2}^{\beta^{(i)}_2}.
+    \]
+    and set $    b_i
+    =
+    \boldsymbol{\alpha}!\,
+    \delta_{\boldsymbol{\beta}^{(i)},\boldsymbol{\alpha}},$
+    \item Solve $V\boldsymbol c=\boldsymbol b,
+    \qquad
+    \boldsymbol c\in\mathbb{R}^N.$
+
+\item Compute the multi-dimensional moments
+\[
+M_{\boldsymbol{\beta}}
+=
+\sum_{j=1}^N
+c_j\boldsymbol{\xi}_j^{\boldsymbol{\beta}},
+\qquad
+|\boldsymbol{\beta}|\geq|\boldsymbol{\alpha}|,
+\quad
+\boldsymbol{\beta}\neq\boldsymbol{\alpha}.
+\]
+    \item Find the first nonzero moment after the target moment
+    \(M_{\boldsymbol{\alpha}}\), and determine the order of accuracy.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{A2Q3: Workflow}
+Choose the four points $(x\pm h,y\pm k)$ and combine them with signs:
+\[
+\frac{f(x+h,y+k)-f(x+h,y-k)
+-f(x-h,y+k)+f(x-h,y-k)}{4hk}.
+\]
+The sign pattern cancels the constant, first-order and pure second-order terms, while retaining $f_{xy}$.
+\begin{block}{The message}
+The mixed-derivative formula is not a separate trick. It is the same Taylor-plus-linear-system workflow in two variables.
+\end{block}
+\end{frame}
+
+
+\section[A2Q4]{From Stencils to Numerical Schemes}
+
+\begin{frame}{A Numerical Scheme Depends on the PDE}
+
+Consider the heat equation
+\[
+u_\tau=u_{xx}.
+\]
+
+The PDE contains two differential operators:
+\[
+u_\tau
+\qquad\text{and}\qquad
+u_{xx}.
+\]
+
+To construct a numerical scheme, we need
+
+\begin{itemize}
+    \item a finite-difference stencil for \(u_\tau\);
+    \item a finite-difference stencil for \(u_{xx}\);
+    \item a rule for combining the two stencils.
+\end{itemize}
+
+\begin{block}{Key idea}
+A numerical scheme is constructed from the differential operators appearing in the PDE.
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}{Finite-Difference Stencils}
+
+For the time derivative,
+\[
+u_\tau(x_i,\tau_j)
+=
+\frac{u_i^{j+1}-u_i^j}{k}
++
+O(k)
+\qquad
+\text{(forward difference)},
+\]
+and
+\[
+u_\tau(x_i,\tau_j)
+=
+\frac{u_i^j-u_i^{j-1}}{k}
++
+O(k)
+\qquad
+\text{(backward difference)}.
+\]
+
+For the spatial second derivative,
+\[
+u_{xx}(x_i,\tau_j)
+=
+\frac{
+u_{i-1}^j-2u_i^j+u_{i+1}^j
+}{h^2}
++
+O(h^2).
+\]
+
+\end{frame}
+
+
+\begin{frame}{Explicit Scheme}
+
+Using the forward difference in time and the central difference in space,
+\[
+u_\tau(x_i,\tau_j)
+=
+\frac{u_i^{j+1}-u_i^j}{k}
++
+O(k),
+\]
+\[
+u_{xx}(x_i,\tau_j)
+=
+\frac{
+u_{i-1}^j-2u_i^j+u_{i+1}^j
+}{h^2}
++
+O(h^2).
+\]
+
+Substituting into \(u_\tau=u_{xx}\) gives
+\[
+\frac{u_i^{j+1}-u_i^j}{k}
+=
+\frac{
+u_{i-1}^j-2u_i^j+u_{i+1}^j
+}{h^2}
++
+O(k)+O(h^2).
+\]
+
+Dropping the truncation-error terms gives the explicit scheme
+\[
+u_i^{j+1}
+=
+\lambda u_{i-1}^j
++
+(1-2\lambda)u_i^j
++
+\lambda u_{i+1}^j,
+\qquad
+\lambda=\frac{k}{h^2}.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Implicit Scheme}
+
+Using the backward difference in time and the central difference
+at the new time level,
+\[
+u_\tau(x_i,\tau_{j+1})
+=
+\frac{u_i^{j+1}-u_i^j}{k}
++
+O(k),
+\]
+and
+\[
+u_{xx}(x_i,\tau_{j+1})
+=
+\frac{
+u_{i-1}^{j+1}-2u_i^{j+1}+u_{i+1}^{j+1}
+}{h^2}
++
+O(h^2).
+\]
+
+The resulting scheme is
+\[
+\frac{u_i^{j+1}-u_i^j}{k}
+=
+\frac{
+u_{i-1}^{j+1}-2u_i^{j+1}+u_{i+1}^{j+1}
+}{h^2}.
+\]
+
+Equivalently,
+\[
+-\lambda u_{i-1}^{j+1}
++
+(1+2\lambda)u_i^{j+1}
+-\lambda u_{i+1}^{j+1}
+=
+u_i^j.
+\]
+
+\end{frame}
+
+
+\begin{frame}{The \(\theta\)-Scheme}
+
+The explicit and implicit schemes are special cases of
+\[
+\frac{u_i^{j+1}-u_i^j}{k}
+=
+(1-\theta)\delta_{xx}u_i^j
++
+\theta\delta_{xx}u_i^{j+1},
+\]
+where
+\[
+\delta_{xx}u_i^j
+=
+\frac{
+u_{i-1}^j-2u_i^j+u_{i+1}^j
+}{h^2}.
+\]
+
+\begin{center}
+\begin{tabular}{c|c}
+\(\theta\) & Scheme \\ \hline
+\(0\) & Explicit Euler \\
+\(1\) & Implicit Euler \\
+\(\frac12\) & Crank--Nicolson
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+
+\begin{frame}{The Crank--Nicolson Scheme}
+
+For \(\theta=\frac12\),
+\[
+\frac{u_i^{j+1}-u_i^j}{k}
+=
+\frac12\delta_{xx}u_i^j
++
+\frac12\delta_{xx}u_i^{j+1}.
+\]
+
+Equivalently,
+\[
+-\frac{\lambda}{2}u_{i-1}^{j+1}
++
+(1+\lambda)u_i^{j+1}
+-\frac{\lambda}{2}u_{i+1}^{j+1}
+\]
+\[
+=
+\frac{\lambda}{2}u_{i-1}^{j}
++
+(1-\lambda)u_i^{j}
++
+\frac{\lambda}{2}u_{i+1}^{j},
+\qquad
+\lambda=\frac{k}{h^2}.
+\]
+
+The new time level appears on the left, so each time step
+requires solving a linear system.
+
+\end{frame}
+
+
+\begin{frame}{Matrix Form}
+
+Let
+\[
+U^j=(u_{1,j},\ldots,u_{n,j})^T
+\]
+denote the vector of interior values.
+
+Define
+\[
+B=
+\begin{pmatrix}
+2&-1&&\\
+-1&2&-1&\\
+&\ddots&\ddots&\ddots\\
+&&-1&2
+\end{pmatrix}.
+\]
+
+Then the Crank--Nicolson scheme can be written as
+\[
+\left(I+\frac{\lambda}{2}B\right)U^{j+1}
+=
+\left(I-\frac{\lambda}{2}B\right)U^j
++
+g^j,
+\]
+where \(g^j\) contains the boundary contributions.
+
+\end{frame}
+
+
+\begin{frame}{A2Q4: Definition of the Residual}
+
+Let
+\[
+v_{i,j}=u(x_i,\tau_j)
+\]
+be the exact solution evaluated at the grid points.
+
+For the Crank--Nicolson scheme, define
+\[
+\eta_{i,j}
+=
+v_{i,j+1}-v_{i,j}
+-\frac{k}{2h^2}
+\Big[
+v_{i-1,j+1}-2v_{i,j+1}+v_{i+1,j+1}
+\]
+\[
+\qquad\qquad\qquad
++
+v_{i-1,j}-2v_{i,j}+v_{i+1,j}
+\Big].
+\]
+The quantity \(\eta_{i,j}\) is the residual obtained by
+substituting the exact solution into the discrete scheme.
+\end{frame}
+
+
+\begin{frame}{A2Q4: Taylor Expansion of the Residual}
+Let
+\[
+x=x_i,\qquad \tau=\tau_j.
+\]
+
+The time expansion is
+\[
+u(x,\tau+k)-u(x,\tau)
+=
+ku_\tau+\frac{k^2}{2}u_{\tau\tau}
++O(k^3).
+\]
+
+For the spatial terms,
+\[
+u(x-h,\tau)-2u(x,\tau)+u(x+h,\tau)
+=
+h^2u_{xx}+O(h^4),
+\]
+and
+\[
+u(x-h,\tau+k)-2u(x,\tau+k)+u(x+h,\tau+k)
+\]
+\[
+=
+h^2u_{xx}
++
+kh^2u_{xx\tau}
++
+O(k^2h^2+h^4).
+\]
+
+Substituting these expansions into \(\eta_{i,j}\) gives
+\[
+\eta_{i,j}
+=
+k(u_\tau-u_{xx})
++
+\frac{k^2}{2}
+(u_{\tau\tau}-u_{xx\tau})
++
+O(kh^2+k^3).
+\]
+
+\end{frame}
+
+\begin{frame}{A2Q4: Local Truncation Error}
+
+Since the exact solution satisfies the heat equation
+\[
+u_\tau=u_{xx},
+\]
+differentiating with respect to \(\tau\) gives
+\[
+u_{\tau\tau}=u_{xx\tau}.
+\]
+
+Therefore, the leading terms in the residual cancel:
+\[
+\eta_{i,j}
+=
+O(kh^2+k^3).
+\]
+
+The local truncation error is
+\[
+\cT_{i,j}
+=
+\frac{\eta_{i,j}}{k}.
+\]
+
+Hence,
+\[
+\cT_{i,j}
+=
+O(h^2+k^2).
+\]
+
+Therefore, the Crank--Nicolson scheme is
+\[
+\boxed{
+\text{second-order accurate in space and time}.
+}
+\]
+
+\end{frame}
+
+
+
+
+\section[A2Q5]{Back to the Black--Scholes Equation}
+
+\begin{frame}{The Transformed Black--Scholes Equation}
+
+Let
+\[
+x=\log S,
+\qquad
+\tau=T-t.
+\]
+
+For constant \(r\) and \(\sigma\), the transformed equation is
+\[
+V_\tau
+=
+\frac{\sigma^2}{2}V_{xx}
++
+\nu V_x
+-rV,
+\qquad
+\nu=r-\frac{\sigma^2}{2}.
+\]
+
+For a European call option,
+\[
+V(x,0)=(e^x-K)^+.
+\]
+
+For the given parameters,
+\[
+S_0=K=100,
+\qquad
+r=0.05,
+\qquad
+\sigma=0.15,
+\qquad
+T=1,
+\]
+we have
+\[
+\nu=0.03875.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Explicit Finite-Difference Scheme}
+
+At \((x_i,\tau_j)\), use
+\[
+V_\tau(x_i,\tau_j)
+=
+\frac{V_i^{j+1}-V_i^j}{k}
++
+O(k),
+\]
+\[
+V_x(x_i,\tau_j)
+=
+\frac{V_{i+1}^j-V_{i-1}^j}{2h}
++
+O(h^2),
+\]
+and
+\[
+V_{xx}(x_i,\tau_j)
+=
+\frac{V_{i-1}^j-2V_i^j+V_{i+1}^j}{h^2}
++
+O(h^2).
+\]
+
+Substituting into the transformed equation gives
+\[
+\frac{V_i^{j+1}-V_i^j}{k}
+=
+\frac{\sigma^2}{2}
+\frac{V_{i-1}^j-2V_i^j+V_{i+1}^j}{h^2}
++
+\nu
+\frac{V_{i+1}^j-V_{i-1}^j}{2h}
+-rV_i^j
++
+O(k)+O(h^2).
+\]
+
+\end{frame}
+
+
+\begin{frame}{Explicit Update Formula}
+
+Dropping the truncation-error terms gives
+\[
+V_i^{j+1}
+=
+c_-V_{i-1}^j
++
+c_0V_i^j
++
+c_+V_{i+1}^j,
+\]
+where
+\[
+c_-
+=
+\frac{\sigma^2k}{2h^2}
+-
+\frac{\nu k}{2h},
+\]
+\[
+c_0
+=
+1-\frac{\sigma^2k}{h^2}-rk,
+\]
+and
+\[
+c_+
+=
+\frac{\sigma^2k}{2h^2}
++
+\frac{\nu k}{2h}.
+\]
+
+The initial values are
+\[
+V_i^0=(e^{x_i}-K)^+.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Boundary Conditions on a Truncated Domain}
+
+The transformed spatial domain is unbounded:
+\[
+x\in\mathbb{R}.
+\]
+
+We truncate it to
+\[
+x\in[a,b].
+\]
+
+For a European call, use
+\[
+V(a,\tau)=0
+\]
+at the low-stock boundary, and
+\[
+V(b,\tau)=e^b-Ke^{-r\tau}
+\]
+at the high-stock boundary.
+
+For \(a=-1\) and \(b=5\),
+\[
+V(-1,\tau)=0,
+\]
+\[
+V(5,\tau)=e^5-100e^{-0.05\tau}.
+\]
+
+\end{frame}
+
+
+\begin{frame}{Numerical Parameters}
+
+Choose
+\[
+h=0.01,
+\qquad
+k=\frac{1}{225},
+\qquad
+m=225.
+\]
+
+The computation proceeds as follows:
+
+\begin{enumerate}
+    \item Construct the spatial grid \(x_i=a+ih\).
+    \item Initialise
+    \[
+    V_i^0=(e^{x_i}-K)^+.
+    \]
+    \item Apply the explicit update for \(j=0,\ldots,m-1\).
+    \item Impose the boundary values at every new time level.
+    \item Evaluate the solution at \(x=\log S_0\).
+\end{enumerate}
+
+Since \(\log(100)\) is generally not a grid point,
+use linear interpolation.
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Implementation}
+
+\begin{lstlisting}
+import numpy as np
+
+K = 100.0
+S0 = 100.0
+r = 0.05
+sigma = 0.15
+
+h = 0.01
+m = 225
+k = 1.0 / m
+nu = r - sigma**2 / 2
+
+c_minus = sigma**2*k/(2*h**2) - nu*k/(2*h)
+c_zero  = 1 - sigma**2*k/h**2 - r*k
+c_plus  = sigma**2*k/(2*h**2) + nu*k/(2*h)
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Implementation (cont'd)}
+\begin{lstlisting}
+def value(a, b):
+    n = round((b-a)/h)
+    x = a + h*np.arange(n+1)
+
+    V = np.maximum(np.exp(x)-K, 0.0)
+    new_V = np.empty_like(V)
+
+    for j in range(m):
+        tau = (j+1)*k
+
+        new_V[1:-1] = (
+            c_minus*V[:-2]
+            + c_zero*V[1:-1]
+            + c_plus*V[2:]
+        )
+        new_V[0] = 0.0
+        new_V[-1] = np.exp(b)-K*np.exp(-r*tau)
+        V, new_V = new_V, V
+    return np.interp(np.log(S0), x, V)
+\end{lstlisting}
+    
+\end{frame}
+
+
+\begin{frame}{Numerical Results}
+On the truncated domain \([-1,5]\),
+\[
+V(\log 100,1)\approx 8.59888676.
+\]
+On the enlarged domain \([-2,10]\),
+\[
+V(\log 100,1)\approx 8.59888870.
+\]
+
+The difference is
+\[
+\left|
+8.59888676-8.59888870
+\right|
+\approx
+1.94\times10^{-6}.
+\]
+
+\begin{block}{Interpretation}
+For these grid parameters, enlarging the computational domain has
+a negligible effect on the computed option value.
+\end{block}
+
+\end{frame}
+
+
+
+
+\section*{End}
+
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\color{blue!70!black}\textbf{Thank You!}}
+\vspace{1cm}
+{\Large Questions?}
+\vfill
+\end{frame}
+
+\end{document}
