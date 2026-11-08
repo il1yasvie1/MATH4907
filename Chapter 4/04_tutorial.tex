@@ -12,6 +12,10 @@
 \lstset{language=Python,basicstyle=\ttfamily\scriptsize,keywordstyle=\color{codeblue},
   showstringspaces=false,columns=fullflexible,keepspaces=true,frame=single,
   breaklines=true,aboveskip=3pt,belowskip=2pt}
+\definecolor{lecturekey}{RGB}{162,30,37}
+\newcommand{\keymath}[1]{\textcolor{lecturekey}{#1}}
+\newcommand{\keybox}[1]{\keymath{\boxed{#1}}}
+\newcommand{\keytext}[1]{\textcolor{lecturekey}{\textbf{#1}}}
 \newcommand{\BS}{\mathcal L_{\!BS}}
 \newcommand{\R}{\mathbb R}
 \newcommand{\dd}{\mathrm d}
@@ -116,7 +120,7 @@ the bank account. The gain on the option and stock is
 +\frac12\sigma^2S^2\frac{\partial^2 V}{\partial S^2}\right)\dd t
 +\left(\frac{\partial V}{\partial S}-\Delta\right)\dd S.
 \end{align*}
-Set $\Delta=\partial V/\partial S$ to cancel the $\dd S$ term.
+\keytext{Set $\Delta=\partial V/\partial S$} to cancel the $\dd S$ term.
 The gain $\dd G$ then has no $\dd W$ term.
 \end{frame}
 
@@ -131,7 +135,7 @@ The gain $\dd G$ then has no $\dd W$ term.
   \end{itemize}
   Therefore $\dd G\leq r\Pi\,\dd t$, or
   \[
-  \boxed{\BS V=
+  \keybox{\BS V=
   \frac{\partial V}{\partial t}
   +\frac12\sigma^2S^2\frac{\partial^2 V}{\partial S^2}
   +rS\frac{\partial V}{\partial S}-rV\leq0}.
@@ -140,10 +144,10 @@ The gain $\dd G$ then has no $\dd W$ term.
   \begin{itemize}
   \item Short one put and $-\Delta$ shares. Deposit $\Pi$ in the bank.
   Net investment is zero.
-  \item \textbf{Continuation region.} The buyer optimally waits. Close
+  \item \keytext{Continuation region.} The buyer optimally waits. Close
   while the inequality holds. The net gain $r\Pi\,\dd t-\dd G>0$
   gives an arbitrage, so $\BS V=0$ here.
-  \item \textbf{Exercise region.} The buyer can exercise before any interest
+  \item \keytext{Exercise region.} The buyer can exercise before any interest
   accrues. Inside this region, $V=K-S$ gives $\Pi=K$ and $\dd G=0$,
   so $\BS V=-rK<0$ for $r>0$.
   \end{itemize}
@@ -228,8 +232,8 @@ State the free-boundary problem for the American put option, including:
 Solve jointly for $V$ and $S_f$:
 \begin{align*}
 \BS V&=0 && S>S_f(t),\quad 0\leq t<T,\\
-V(S_f(t),t)&=K-S_f(t) &&\text{value matching},\quad t<T,\\
-\frac{\partial V}{\partial S}(S_f(t)^+,t)&=-1 &&\text{smooth pasting},\quad t<T,\\
+V(S_f(t),t)&=K-S_f(t) &&\text{\keytext{value matching}},\quad t<T,\\
+\frac{\partial V}{\partial S}(S_f(t)^+,t)&=-1 &&\text{\keytext{smooth pasting}},\quad t<T,\\
 V(S,T)&=(K-S)^+ && S\geq0.
 \end{align*}
 \end{frame}
@@ -278,7 +282,7 @@ At fixed $x$,
 \[
 u_t=V_t+x\beta'(t)V_S
 \quad\Longrightarrow\quad
-\boxed{V_t=u_t-\frac{x\beta'(t)}{\beta(t)}u_x}.
+\keybox{V_t=u_t-\frac{x\beta'(t)}{\beta(t)}u_x}.
 \]
 Here $V_t$ is taken at fixed $S$.
 \end{frame}
@@ -310,7 +314,7 @@ Apply the three identities from part (a) to the Black--Scholes PDE:
    +\frac12\sigma^2S^2V_{SS}-rV\\
 &= \left(u_t-\frac{x\beta'(t)}{\beta(t)}u_x\right)
    +r(xu_x)+\frac12\sigma^2(x^2u_{xx})-ru\\
-&= u_t+x\left(r-\frac{\beta'(t)}{\beta(t)}\right)u_x
+&= u_t+\keymath{x\left(r-\frac{\beta'(t)}{\beta(t)}\right)u_x}
    +\frac12\sigma^2x^2u_{xx}-ru.
 \end{align*}
 Since $S>\beta(t)$ maps to $x>1$, the new domain is
@@ -381,8 +385,8 @@ Let $U_{i,j}\approx u(x_i,t_j)$ and $\beta_j\approx\beta(t_j)$.
 Start from the known expiry data $\beta_m=K$ and $U_{i,m}=0$.
 Compute one earlier time level at a time:
 \[
-t_m=T\ \longrightarrow\ t_{m-1}\ \longrightarrow\ \cdots\
-\longrightarrow\ t_0=0.
+\keymath{t_m=T\ \longrightarrow\ t_{m-1}\ \longrightarrow\ \cdots\
+\longrightarrow\ t_0=0.}
 \]
 To find $U_{i,j}$, use the spatial differences at the known time $t_{j+1}$:
 \[
@@ -415,7 +419,7 @@ and one-sided smooth pasting $(U_{1,j}-U_{0,j})/h=-\beta_j$:
 \[
 U_{1,j}=K-(1+h)\beta_j
 \quad\Longrightarrow\quad
-\boxed{(1+h+B_1)\beta_j=K-A_1+B_1\beta_{j+1}}.
+\keybox{(1+h+B_1)\beta_j=K-A_1+B_1\beta_{j+1}}.
 \]
 \item \textbf{Update the values.} Substitute $\beta_j$ into the formula
 in Step 1. Set $U_{0,j}=K-\beta_j$ and $U_{n+1,j}=0$.
@@ -507,8 +511,8 @@ u-g=e^{-\alpha x-\beta\tau}[V-(K-S)^+],
 Thus $u\geq g$ means the put is worth at least its exercise payoff,
 and $u_\tau-u_{xx}\geq0$ means $\BS V\leq0$.
 \begin{itemize}
-\item Continue: $u>g$ forces $u_\tau-u_{xx}=0$.
-\item Exercise: $u=g$ allows a positive residual. Inside the exercise
+\item \keytext{Continue.} $u>g$ forces $u_\tau-u_{xx}=0$.
+\item \keytext{Exercise.} $u=g$ allows a positive residual. Inside the exercise
 region, $\BS V=-rK<0$ for $r>0$.
 \end{itemize}
 \end{frame}
@@ -543,14 +547,14 @@ $\beta=-(\tfrac12+r/\sigma^2)^2$.
 $S_l=Ke^{x_l}$ lies in the exercise region throughout the time interval.
 Then $V(S_l,t)=K-S_l$, so
 \[
-\boxed{u(x_l,\tau)=g(x_l,\tau)
+\keybox{u(x_l,\tau)=g(x_l,\tau)
 =e^{-\alpha x_l-\beta\tau}K(1-e^{x_l})}.
 \]
 \item \textbf{Right boundary $x_r$.} For sufficiently large $S_r=Ke^{x_r}$,
 the put value is small. Approximate
 $u(x_r,\tau)=e^{-\alpha x_r-\beta\tau}V(S_r,t)$ by imposing
 \[
-\boxed{u(x_r,\tau)=0}.
+\keybox{u(x_r,\tau)=0}.
 \]
 \end{itemize}
 \end{frame}
@@ -614,7 +618,7 @@ Clearly define the matrix $A$.
 \small
 The interior stencil gives the $n\times n$ matrix
 \[
-\boxed{A=\operatorname{tridiag}(-\lambda,\,1+2\lambda,\,-\lambda)}.
+\keybox{A=\operatorname{tridiag}(-\lambda,\,1+2\lambda,\,-\lambda)}.
 \]
 At time $\tau_j$, the left and right boundary values are
 $u_{0,j}=g(x_l,\tau_j)$ and $u_{n+1,j}=0$. Only the left value adds a term:
@@ -652,11 +656,11 @@ Define $q$ explicitly.
 Substitute $\bm u^j=\bm z^j+\bm g^j$:
 \[
 A\bm u^j-\bm b^j=A\bm z^j+\bm q^j,\qquad
-\boxed{\bm q^j=A\bm g^j-\bm u^{j-1}-\lambda g(x_l,\tau_j)\bm e_1}.
+\keybox{\bm q^j=A\bm g^j-\bm u^{j-1}-\lambda g(x_l,\tau_j)\bm e_1}.
 \]
 Hence $\bm w=A\bm z^j+\bm q^j$ satisfies
 \[
-\bm z^j\geq0,\qquad \bm w\geq0,\qquad \bm w^\top\bm z^j=0.
+\keymath{\bm z^j\geq0,\qquad \bm w\geq0,\qquad \bm w^\top\bm z^j=0.}
 \]
 \end{frame}
 
@@ -698,7 +702,7 @@ Complementarity requires $z\geq0$, $p+mz\geq0$ and $z(p+mz)=0$.
 \item If $p\geq0$, any $z>0$ gives $p+mz>0$, so $z=0$.
 \item If $p<0$, feasibility forces $z>0$, so $p+mz=0$ and $z=-p/m$.
 \end{itemize}
-Thus $\boxed{z=\max\{0,-p/m\}}$.
+Thus $\keybox{z=\max\{0,-p/m\}}$.
 \end{frame}
 
 \begin{frame}{Q4(b): Problem}
@@ -719,15 +723,28 @@ Solve
 \end{frame}
 
 \begin{frame}{Q4(b): Triangular example}
-\small
-Solve one row at a time:
+\footnotesize
+Since $M$ is lower triangular, solve from the first row to the last.
+The componentwise minimum gives
 \begin{align*}
-z_1&=\max\{0,1\}=1,\\
-z_2&=\max\{0,-(2+z_1)/3\}=0,\\
-z_3&=\max\{0,-(-1+z_1+2z_2)/3\}=0.
+\min\{z_1,-3+3z_1\}&=0,\\
+\min\{z_2,2+z_1+3z_2\}&=0,\\
+\min\{z_3,-1+z_1+2z_2+3z_3\}&=0.
 \end{align*}
-For $\bm z=(1,0,0)^\top$ the residual is $\bm p+M\bm z=(0,3,0)^\top$.
-Both vectors are nonnegative and their dot product is zero.
+In each row, both terms must be nonnegative and at least one must be zero.
+\begin{enumerate}
+\item If $z_1=0$, the second term is $-3<0$. Set
+$-3+3z_1=0$ to get $z_1=1$.
+\item With $z_1=1$, the second term is $3+3z_2>0$ for $z_2\geq0$.
+Hence $z_2=0$.
+\item With $z_1=1$ and $z_2=0$, the equation is
+$\min\{z_3,3z_3\}=0$. Hence $z_3=0$.
+\end{enumerate}
+\[
+\keybox{\bm z=(1,0,0)^\top},\qquad
+\bm p+M\bm z=(0,3,0)^\top,\qquad
+\min\{\bm z,\bm p+M\bm z\}=\bm0.
+\]
 \end{frame}
 
 \begin{frame}{Q4(c): Problem}
@@ -749,7 +766,7 @@ iteration.
 \small
 For $m_{ii}>0$, use the old iterate in every off-diagonal term:
 \[
-\boxed{z_i^{(\ell+1)}=
+\keybox{z_i^{(\ell+1)}=
 \max\left\{0,-\frac{p_i+\sum_{j\ne i}m_{ij}z_j^{(\ell)}}{m_{ii}}\right\},
 \quad i=1,\ldots,n.}
 \]
@@ -770,7 +787,7 @@ called \textquotedblleft{}projected\textquotedblright.
 \small
 For $m_{ii}>0$, use new values for $j<i$ and old values for $j>i$:
 \[
-\boxed{z_i^{(\ell+1)}=
+\keybox{z_i^{(\ell+1)}=
 \max\left\{0,-\frac{p_i+
 \sum_{j<i}m_{ij}z_j^{(\ell+1)}+
 \sum_{j>i}m_{ij}z_j^{(\ell)}}{m_{ii}}\right\}.}
@@ -834,20 +851,50 @@ State the transformed boundary condition at $x=0$.
 \end{block}
 \end{frame}
 
-\begin{frame}{Q5(b): Heat-equation transformation}
+\begin{frame}{Q5(b): Differentiate the change of variables}
 \small
-Substitute the change of variables from the question and divide by
-$\sigma^2 e^{a\tau+bx}/2$:
+Write $V(S,t)=e^{a\tau+bx}u(x,\tau)$, with
+$x=\ln(S/H)$ and $\tau=\tfrac12\sigma^2(T-t)$. Then
 \[
--u_\tau+u_{xx}
-+\underbrace{(2b+2r/\sigma^2-1)}_{0}u_x
-+\underbrace{(b^2+(2r/\sigma^2-1)b-2r/\sigma^2-a)}_{0}u=0.
+x_S=\frac1S,\quad x_t=0,\qquad
+\tau_S=0,\quad \tau_t=-\frac{\sigma^2}{2}.
 \]
-The barrier $S=H$ maps to $x=0$, and expiry maps to $\tau=0$:
-\[
-\boxed{u_\tau-u_{xx}=0,\qquad u(0,\tau)=0},
-\qquad u(x,0)=e^{-bx}(He^x-K)^+.
-\]
+The chain rule and product rule give
+\begin{align*}
+V_t
+&=-\tfrac12\sigma^2\,\partial_\tau(e^{a\tau+bx}u)
+ =-\tfrac12\sigma^2 e^{a\tau+bx}(u_\tau+au),\\
+SV_S
+&=\partial_x(e^{a\tau+bx}u)
+ =e^{a\tau+bx}(u_x+bu),\\
+S^2V_{SS}
+&=S\partial_S(SV_S)-SV_S\\
+&=\partial_x\!\left[e^{a\tau+bx}(u_x+bu)\right]-e^{a\tau+bx}(u_x+bu)\\
+&=e^{a\tau+bx}\!\left[u_{xx}+(2b-1)u_x+(b^2-b)u\right].
+\end{align*}
+\end{frame}
+
+\begin{frame}{Q5(b): Heat equation and transformed conditions}
+\footnotesize
+Insert the derivatives into $\BS V=V_t+\tfrac12\sigma^2S^2V_{SS}+rSV_S-rV=0$:
+\begin{align*}
+0&=\frac{2e^{-a\tau-bx}}{\sigma^2}\BS V\\
+ &=-(u_\tau+au)+u_{xx}+(2b-1)u_x+(b^2-b)u
+    +\tfrac{2r}{\sigma^2}(u_x+bu-u)\\
+ &=-u_\tau+u_{xx}
+    +\bigl(2b-1+\tfrac{2r}{\sigma^2}\bigr)u_x
+    +\bigl(b^2+(\tfrac{2r}{\sigma^2}-1)b-a-\tfrac{2r}{\sigma^2}\bigr)u\\
+ &=-u_\tau+u_{xx}.
+\end{align*}
+The last line uses $\tfrac{2r}{\sigma^2}-1=-2b$ and
+$a=-b^2-\tfrac{2r}{\sigma^2}$. Thus \keytext{$u_\tau-u_{xx}=0$} for $x>0$.
+
+\medskip
+Use $S=He^x$ and $u=e^{-a\tau-bx}V$ to transform the data:
+\begin{align*}
+S=H\ \Rightarrow\ x=0:\qquad &u(0,\tau)=e^{-a\tau}V(H,t)=0,\\
+t=T\ \Rightarrow\ \tau=0:\qquad &u(x,0)=e^{-bx}V(He^x,T)=e^{-bx}(He^x-K)^+.
+\end{align*}
 \end{frame}
 
 \begin{frame}{Q5(c): Problem}
@@ -884,7 +931,7 @@ $S_0$ does not lie exactly on the spatial grid.
 At $x_r=2.405$, set $S_r=He^{x_r}$ and approximate
 $V(S_r,t)\simeq S_r-Ke^{-r(T-t)}$. Using $T-t=2\tau/\sigma^2$ gives
 \[
-\boxed{u(x_r,\tau)=e^{-a\tau-bx_r}
+\keybox{u(x_r,\tau)=e^{-a\tau-bx_r}
 \left(He^{x_r}-Ke^{-2r\tau/\sigma^2}\right).}
 \]
 \footnotesize
@@ -897,12 +944,12 @@ prints $e^{-r\tau}$.
 Set $\tau_*=\sigma^2T/2$, $h=x_r/N$, $k=\tau_*/m$, $\lambda=k/h^2$ and
 $U_i^j\approx u(ih,jk)$.
 \[
-\boxed{U_i^{j+1}=\lambda U_{i-1}^j+(1-2\lambda)U_i^j+\lambda U_{i+1}^j},
+\keybox{U_i^{j+1}=\lambda U_{i-1}^j+(1-2\lambda)U_i^j+\lambda U_{i+1}^j},
 \qquad 1\leq i<N.
 \]
 Initialize from $u(x,0)$. At each step impose
 $U_0^{j+1}=0$ and $U_N^{j+1}=u(x_r,(j+1)k)$.
-For $0\leq\lambda\leq1/2$, the interior update is a convex combination.
+For \keytext{$0\leq\lambda\leq1/2$}, the interior update is a convex combination.
 \end{frame}
 
 \begin{frame}{Q5(c): Recovering an off-grid price}
@@ -913,7 +960,7 @@ Interpolate at $\tau_*$ and undo the scaling:
 V(S_0,0)\approx
 e^{a\tau_*+bx_0}\big[(1-\theta)U_i^m+\theta U_{i+1}^m\big].
 \]
-With $N=400$ and $m=3113$, the price is $15.429952908$
+With $N=400$ and $m=3113$, the price is \keytext{$15.429952908$}
 (benchmark $15.429265555$).
 
 \medskip
@@ -963,7 +1010,7 @@ $N$ intervals & $m$ steps & $\lambda$ & FD price & Absolute error\\\midrule
 800&12449&0.399970&15.429450136&0.000184580\\\bottomrule
 \end{tabular}
 \end{center}
-All runs satisfy $\lambda\leq0.4<1/2$. The absolute error decreases on these meshes.
+All runs satisfy \keytext{$\lambda\leq0.4<1/2$}. The absolute error decreases on these meshes.
 \end{frame}
 
 \begin{frame}{Submission requirements.}
