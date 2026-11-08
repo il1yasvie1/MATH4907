@@ -27,7 +27,6 @@
 
 \section{Q1: American put}
 
-% Assignment 5 statements interleaved with their worked solutions.
 \begin{frame}{1. American put option and free-boundary formulation.}
 \footnotesize
 \setlength{\abovedisplayskip}{5pt}
@@ -229,14 +228,14 @@ Solve jointly for $V$ and $S_f$:
 \begin{align*}
 \BS V&=0 && S>S_f(t),\quad 0\leq t<T,\\
 V(S_f(t),t)&=K-S_f(t) &&\text{value matching},\quad t<T,\\
-\frac{\partial V}{\partial S}(S_f(t)^+,t)&=-1 &&\text{smooth pasting},\quad t<T,\\
-V(S,T)&=(K-S)^+ && S\geq0.
+V(S,T)&=(K-S)^+ && S\geq0 \\
+\frac{\partial V}{\partial S}(S_f(t)^+,t)&=-1 &&\text{smooth pasting},\quad t<T.
 \end{align*}
 \end{frame}
 
 \section{Q2: Front fixing}
 
-% Assignment 5 statements interleaved with their worked solutions.
+
 \begin{frame}{2. Front-fixing method for the American put option.}
 \footnotesize
 \setlength{\abovedisplayskip}{5pt}
