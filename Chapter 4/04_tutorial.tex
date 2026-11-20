@@ -74,17 +74,18 @@ Explain why equality does not necessarily hold everywhere for an American option
 \small
 For $\dd X=a\,\dd t+b\,\dd W$, write $\langle\dd X,\dd X\rangle$
 for the quadratic variation increment. The rules are
-\[
+\[\boxed{
 \langle\dd W,\dd W\rangle=\dd t,\qquad
 \langle\dd t,\dd W\rangle=\langle\dd t,\dd t\rangle=0,
 \qquad
-\langle\dd X,\dd X\rangle=b^2\,\dd t.
+\langle\dd X,\dd X\rangle=b^2\,\dd t.}
 \]
 For a smooth function $f(X,t)$, It\^o's formula is
 \[
+\boxed{
 \dd f=\frac{\partial f}{\partial t}\,\dd t
 +\frac{\partial f}{\partial X}\,\dd X
-+\frac12\frac{\partial^2 f}{\partial X^2}\langle\dd X,\dd X\rangle.
++\frac12\frac{\partial^2 f}{\partial X^2}\langle\dd X,\dd X\rangle.}
 \]
 The last term comes from the second-order Taylor term. As the time
 intervals shrink, the sum of squared Brownian increments converges
@@ -133,7 +134,7 @@ The gain $\dd G$ then has no $\dd W$ term.
   \item Keep the put unexercised. Close while the inequality holds.
   Net gain $\dd G-r\Pi\,\dd t>0$ gives an arbitrage.
   \end{itemize}
-  Therefore $\dd G\leq r\Pi\,\dd t$, or
+  Therefore $\dd G\leq r\Pi\,\dd t$, or equivalently
   \[
   \keybox{\BS V=
   \frac{\partial V}{\partial t}
@@ -270,7 +271,7 @@ u_t-\frac{x\beta'(t)}{\beta(t)}u_x=V_t.
 \end{block}
 \end{frame}
 
-\begin{frame}{Q2(a): Chain-rule identities}
+\begin{frame}{Q2(a): Chain-rule}
 \small
 The continuation region $S>\beta(t)$ maps to $x>1$.
 At fixed $t$,
@@ -379,7 +380,7 @@ used to discretize the transformed PDE.
 \end{block}
 \end{frame}
 
-\begin{frame}{Q2(d): Finite differences and the time direction}
+\begin{frame}{Q2(d): Finite difference stencils and scheme}
 \small
 Let $U_{i,j}\approx u(x_i,t_j)$ and $\beta_j\approx\beta(t_j)$.
 Start from the known expiry data $\beta_m=K$ and $U_{i,m}=0$.
