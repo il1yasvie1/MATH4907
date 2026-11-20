@@ -23,33 +23,12 @@
 \graphicspath{{figures/}}
 \input{05_results.tex}
 \title[MATH4907 Tutorial 5]{MATH4907 Tutorial 5}
-\subtitle{Assignment 5: Monte Carlo Method -- Worked Solutions}
 \author{Sanyang Liu}
 \date{November 20, 2026}
 \AtBeginSection[]{\begin{frame}{Roadmap}\tableofcontents[currentsection,hideallsubsections]\end{frame}}
 
 \begin{document}
 \maketitle
-
-\begin{frame}{The common Monte Carlo template}
-\small
-Rewrite the target as an expectation $\theta=\E[H(X)]$. For independent samples
-$X_1,\ldots,X_N$ from the prescribed distribution, use
-\[
-\widehat\theta_N=\frac1N\sum_{i=1}^N H(X_i),\qquad
-s_H^2=\frac1{N-1}\sum_{i=1}^N(H(X_i)-\widehat\theta_N)^2.
-\]
-The estimated standard error and approximate 95\% confidence interval are
-\[
-\widehat{\SE}=\frac{s_H}{\sqrt N},\qquad
-\widehat\theta_N\pm1.96\widehat{\SE}.
-\]
-\begin{block}{Reproducibility}
-The numerical answers use fixed, separate seeds for Questions 2--7.
-The accompanying \texttt{05\_tutorial.py} regenerates every numerical value
-and both figures. Different seeds give different, equally valid estimates.
-\end{block}
-\end{frame}
 
 \section[Q1]{Q1: Pseudorandom numbers}
 
@@ -93,8 +72,7 @@ the recurrence, not for the later simulations.
 A computer applies a deterministic recurrence to a finite state. If the
 algorithm, parameters, and seed are known, every later value is determined.
 Finite state also implies that a sequence eventually repeats.
-\medskip
-\keytext{Pseudorandom} means that suitable algorithms produce sequences whose
+\textcolor{red}{Pseudorandom} means that suitable algorithms produce sequences whose
 statistical behavior resembles random draws for practical simulation, while
 remaining reproducible. Hardware entropy can supply true physical randomness,
 but the LCG in this question has none.
