@@ -1,0 +1,524 @@
+\documentclass{beamer}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,array,graphicx,listings,xcolor}
+\usetheme{Boadilla}
+\useoutertheme{miniframes}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[default]
+\definecolor{codeblue}{RGB}{42,55,150}
+\definecolor{lecturekey}{RGB}{162,30,37}
+\lstset{language=Python,basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{codeblue},showstringspaces=false,
+  columns=fullflexible,keepspaces=true,frame=single,breaklines=true}
+\newcommand{\keytext}[1]{\textcolor{lecturekey}{\textbf{#1}}}
+\newcommand{\keybox}[1]{\textcolor{lecturekey}{\boxed{#1}}}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\SE}{\operatorname{SE}}
+\newcommand{\pos}[1]{(#1)^+}
+\graphicspath{{figures/}}
+\input{05_results.tex}
+\title[MATH4907 Tutorial 5]{MATH4907 Tutorial 5}
+\subtitle{Assignment 5: Monte Carlo Method -- Worked Solutions}
+\author{Sanyang Liu}
+\date{November 20, 2026}
+\AtBeginSection[]{\begin{frame}{Roadmap}\tableofcontents[currentsection,hideallsubsections]\end{frame}}
+
+\begin{document}
+\maketitle
+
+\begin{frame}{The common Monte Carlo template}
+\small
+Rewrite the target as an expectation $\theta=\E[H(X)]$. For independent samples
+$X_1,\ldots,X_N$ from the prescribed distribution, use
+\[
+\widehat\theta_N=\frac1N\sum_{i=1}^N H(X_i),\qquad
+s_H^2=\frac1{N-1}\sum_{i=1}^N(H(X_i)-\widehat\theta_N)^2.
+\]
+The estimated standard error and approximate 95\% confidence interval are
+\[
+\widehat{\SE}=\frac{s_H}{\sqrt N},\qquad
+\widehat\theta_N\pm1.96\widehat{\SE}.
+\]
+\begin{block}{Reproducibility}
+The numerical answers use fixed, separate seeds for Questions 2--7.
+The accompanying \texttt{05\_tutorial.py} regenerates every numerical value
+and both figures. Different seeds give different, equally valid estimates.
+\end{block}
+\end{frame}
+
+\section[Q1]{Q1: Pseudorandom numbers}
+
+\begin{frame}{Q1: Problem (10 points)}
+\small
+Starting from $X_0=5$, consider
+\[
+X_i=(7X_{i-1}+3)\bmod16.
+\]
+\begin{enumerate}
+\item[(a)] Generate $X_1,\ldots,X_{20}$.
+\item[(b)] Compute $U_i=X_i/16\in[0,1)$.
+\item[(c)] Use $Y_i=2+3U_i$ to produce samples in $[2,5)$.
+\item[(d)] Explain why these numbers are pseudorandom.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q1(a)--(c): The complete 20-value sequences}
+\small
+$X_1=(7\cdot5+3)\bmod16=6$. Continuing gives a cycle of length four:
+\[
+\begin{array}{c|rrrr}
+i\bmod4&1&2&3&0\\\hline
+X_i&6&13&14&5\\
+U_i=X_i/16&0.3750&0.8125&0.8750&0.3125\\
+Y_i=2+3U_i&3.1250&4.4375&4.6250&2.9375
+\end{array}
+\]
+Each row's four entries repeat \keytext{five times}, yielding exactly 20
+values of $X_i$, $U_i$, and $Y_i$. In particular $X_4=X_0=5$, so the
+sequence cannot produce more than four distinct values with this seed.
+\begin{block}{Why the transformation works}
+For an ideal $U\sim U[0,1)$, $2+3U\sim U[2,5)$. The four LCG values above
+only approximate this ideal very poorly; this toy generator is for illustrating
+the recurrence, not for the later simulations.
+\end{block}
+\end{frame}
+
+\begin{frame}{Q1(d): Why pseudorandom?}
+\small
+A computer applies a deterministic recurrence to a finite state. If the
+algorithm, parameters, and seed are known, every later value is determined.
+Finite state also implies that a sequence eventually repeats.
+\medskip
+\keytext{Pseudorandom} means that suitable algorithms produce sequences whose
+statistical behavior resembles random draws for practical simulation, while
+remaining reproducible. Hardware entropy can supply true physical randomness,
+but the LCG in this question has none.
+\end{frame}
+
+\section[Q2]{Q2: Inverse transform}
+
+\begin{frame}{Q2: Problem (10 points)}
+\small
+Let $X$ be exponential with mean $\mu=2$ and density
+$f(x)=\tfrac12e^{-x/2}$ for $x\geq0$.
+\begin{enumerate}
+\item[(a)] Derive its cumulative distribution function.
+\item[(b)] Derive $X=-2\ln(1-U)$ for $U\sim U(0,1)$.
+\item[(c)] Explain the equivalent formula $X=-2\ln U$.
+\item[(d)] Generate 10,000 values; compare a normalized histogram with the
+true density and report sample mean and variance.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q2(a)--(c): Distribution and inverse transform}
+\small
+For $x<0$, $F(x)=0$. For $x\geq0$,
+\[
+F(x)=\int_0^x\frac12e^{-t/2}\,dt=1-e^{-x/2}.
+\]
+Setting $U=F(X)$ and solving for $X$ gives
+\[
+U=1-e^{-X/2}
+\quad\Longrightarrow\quad
+\keybox{X=F^{-1}(U)=-2\ln(1-U)}.
+\]
+Since $U\sim U(0,1)$ implies $1-U\sim U(0,1)$, the alternative
+$-2\ln U$ has the same exponential distribution. In floating-point code,
+\texttt{-2*log1p(-U)} evaluates the first expression accurately near zero.
+\medskip
+Theoretical checks: $\E[X]=2$ and $\Var(X)=4$.
+\end{frame}
+
+\begin{frame}{Q2(d): Simulation with 10,000 samples}
+\footnotesize
+\begin{columns}[T]
+\column{0.60\textwidth}
+\includegraphics[width=\linewidth]{q2_exponential.png}
+\column{0.38\textwidth}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value\\\midrule
+Sample mean & \QTwoMean\\
+Sample variance & \QTwoVariance\\
+Theoretical mean & 2\\
+Theoretical variance & 4\\\bottomrule
+\end{tabular}
+\medskip
+The histogram is normalized as a density, so its area is approximately one.
+The solid curve is $f(x)=\frac12e^{-x/2}$.
+\end{columns}
+\end{frame}
+
+\section[Q3]{Q3: Acceptance--rejection}
+
+\begin{frame}{Q3: Problem (20 points)}
+\small
+Sample from $f(x)=3x^2$ on $[0,1]$ using acceptance--rejection,
+\emph{not} inverse transform. Take proposal $g(x)=2x$ and
+$X'=\sqrt V$ with $V\sim U(0,1)$.
+\begin{enumerate}
+\item[(a)] Find the smallest envelope constant $\alpha$.
+\item[(b)] Simplify $f(X')/(\alpha g(X'))$.
+\item[(c)] Give pseudocode for $n$ accepted samples.
+\item[(d)] Produce 10,000 accepted samples and compare with $f$.
+\item[(e)] Compare empirical and theoretical efficiencies.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q3(a)--(b): Envelope and acceptance rule}
+\small
+For $x>0$,
+\[
+\frac{f(x)}{g(x)}=\frac{3x^2}{2x}=\frac32x,
+\qquad
+\keybox{\alpha=\sup_{0<x\leq1}\frac{f(x)}{g(x)}=\frac32}.
+\]
+The ratio at $x=0$ is irrelevant because $P(X'=0)=0$. Consequently,
+\[
+\frac{f(X')}{\alpha g(X')}
+=\frac{3(X')^2}{(3/2)(2X')}=X'.
+\]
+Draw independent $U,V\sim U(0,1)$, set $X'=\sqrt V$, and
+\keytext{accept precisely when $U\leq X'$}.
+\medskip
+Since $\int f=\int g=1$, the acceptance probability is
+\[
+P(\text{accept})=\frac1\alpha=\keybox{\frac23}.
+\]
+\end{frame}
+
+\begin{frame}[fragile]{Q3(c): Pseudocode}
+\small
+\begin{lstlisting}
+accepted = []
+proposals = 0
+while len(accepted) < n:
+    V = Uniform(0, 1)
+    U = Uniform(0, 1)  # independent of V
+    x_proposal = sqrt(V)
+    proposals += 1
+    if U <= x_proposal:
+        accepted.append(x_proposal)
+efficiency = n / proposals
+\end{lstlisting}
+Each rejected pair is discarded. Stop only after $n$ proposals have been
+\emph{accepted}; the proposal count is generally larger than $n$.
+\end{frame}
+
+\begin{frame}{Q3(d)--(e): Histogram and efficiency}
+\footnotesize
+\begin{columns}[T]
+\column{0.60\textwidth}
+\includegraphics[width=\linewidth]{q3_rejection.png}
+\column{0.38\textwidth}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lr}
+\toprule
+Quantity & Value\\\midrule
+Accepted samples & 10,000\\
+Total proposals & \QThreeProposals\\
+Empirical efficiency & \QThreeEfficiency\\
+Theoretical efficiency & $2/3$\\\bottomrule
+\end{tabular}
+\medskip
+The normalized histogram follows the target curve $f(x)=3x^2$.
+The empirical acceptance fraction is close to $2/3$.
+\end{columns}
+\end{frame}
+
+\section[Q4]{Q4: Monte Carlo integration}
+
+\begin{frame}{Q4: Problem (15 points)}
+\small
+Estimate $I=\int_0^1e^{-x^2}\,dx$ by drawing $X_i\sim U(0,1)$.
+\begin{enumerate}
+\item[(a)] Derive the Monte Carlo estimator.
+\item[(b)] Report estimates for $N=100,1{,}000,10{,}000,100{,}000$.
+\item[(c)] For each $N$, use the sample standard deviation of $e^{-X_i^2}$
+to form an approximate 95\% confidence interval.
+\item[(d)] Explain how its width changes with $N$.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q4(a): Integral as an expectation}
+\small
+The uniform density is one on $[0,1]$, so
+\[
+I=\int_0^1e^{-x^2}\,dx=\E[e^{-X^2}],
+\qquad X\sim U(0,1).
+\]
+For independent $X_1,\ldots,X_N$, define $H_i=e^{-X_i^2}$ and use
+\[
+\keybox{\widehat I_N=\frac1N\sum_{i=1}^N H_i},
+\qquad
+s_H^2=\frac1{N-1}\sum_{i=1}^N(H_i-\widehat I_N)^2.
+\]
+Then $\E[\widehat I_N]=I$ and the approximate 95\% interval is
+$\widehat I_N\pm1.96s_H/\sqrt N$.
+\medskip
+An independent check is
+$I=\frac{\sqrt\pi}{2}\operatorname{erf}(1)=\QFourExact$.
+\end{frame}
+
+\begin{frame}{Q4(b)--(c): Estimates and confidence intervals}
+\footnotesize
+The first $N$ values of one fixed stream are used for each row.
+\medskip
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+$N$ & $\widehat I_N$ & $s_H$ & 95\% CI lower & 95\% CI upper\\\midrule
+100 & \QFourAMean & \QFourASD & \QFourALow & \QFourAHigh\\
+1,000 & \QFourBMean & \QFourBSD & \QFourBLow & \QFourBHigh\\
+10,000 & \QFourCMean & \QFourCSD & \QFourCLow & \QFourCHigh\\
+100,000 & \QFourDMean & \QFourDSD & \QFourDLow & \QFourDHigh\\\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+These intervals quantify sampling uncertainty. A particular realized
+estimate need not move monotonically toward the true value as $N$ grows.
+\end{frame}
+
+\begin{frame}{Q4(d): Why larger $N$ narrows the interval}
+\small
+For independent $H_i$ with variance $\sigma_H^2$,
+\[
+\Var(\widehat I_N)=\frac{\sigma_H^2}{N},\qquad
+\SE(\widehat I_N)=\frac{\sigma_H}{\sqrt N}.
+\]
+The approximate full width is $2(1.96)s_H/\sqrt N$.
+When $s_H$ stays roughly constant, multiplying $N$ by ten shrinks the
+width by about $1/\sqrt{10}\approx0.316$; multiplying $N$ by 100
+shrinks it by about $1/10$.
+\end{frame}
+
+\section[Q5]{Q5: Crude Monte Carlo call pricing}
+
+\begin{frame}{Q5: Problem (20 points)}
+\small
+Under the risk-neutral Black--Scholes model, let
+\[
+S_T=S_0\exp\!\left((r-\tfrac12\sigma^2)T+\sigma\sqrt T Z\right),
+\quad Z\sim N(0,1),
+\]
+with $S_0=95$, $K=100$, $r=0.01$, $\sigma=0.4$, $T=1$.
+The European call price is $c_0=e^{-rT}\E[(S_T-K)^+]$.
+\begin{enumerate}
+\item[(a)] Derive the crude Monte Carlo estimator.
+\item[(b)--(c)] Estimate with $N=10{,}000$ and give a 95\% interval.
+\item[(d)] Repeat with $N=100{,}000$ and compare.
+\item[(e)] Explain the $N^{-1/2}$ standard-error scaling.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q5(a): Discount each simulated payoff}
+\small
+For independent $Z_i\sim N(0,1)$, compute
+\[
+S_T^{(i)}=95\exp(-0.07+0.4Z_i),\qquad
+W_i=e^{-0.01}(S_T^{(i)}-100)^+.
+\]
+Then
+\[
+\keybox{\widehat c_N=\frac1N\sum_{i=1}^N W_i
+=e^{-rT}\frac1N\sum_{i=1}^N(S_T^{(i)}-K)^+}.
+\]
+The estimated standard error is $s_W/\sqrt N$, where $s_W$ is the sample
+standard deviation of the \emph{discounted} payoffs. Hence the 95\%
+interval is $\widehat c_N\pm1.96s_W/\sqrt N$.
+\end{frame}
+
+\begin{frame}{Q5(b)--(d): Numerical call estimates}
+\footnotesize
+The 10,000-path run is the prefix of the 100,000-path run.
+\medskip
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+$N$ & Estimate & Estimated SE & 95\% CI lower & 95\% CI upper\\\midrule
+10,000 & \QFiveAMean & \QFiveASE & \QFiveALow & \QFiveAHigh\\
+100,000 & \QFiveBMean & \QFiveBSE & \QFiveBLow & \QFiveBHigh\\\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+The Black--Scholes closed-form price, used only as a check, is
+$c_0=\QFiveExact$. Both Monte Carlo intervals contain this value.
+The 100,000-path interval is narrower and its estimate happens to be
+closer to the check value; a larger $N$ does not guarantee that the
+realized error decreases on every run.
+\end{frame}
+
+\begin{frame}{Q5(e): Scaling and a wording inconsistency}
+\small
+Since $\Var(\widehat c_N)=\Var(W)/N$,
+\[
+\SE(\widehat c_{100N})=\frac1{10}\SE(\widehat c_N)
+\quad\text{when the payoff variance is fixed.}
+\]
+Thus reducing standard error by a factor of 10 generally requires
+\keytext{100 times as many paths}.
+\medskip
+\begin{block}{Read parts (d) and (e) separately}
+Part (d) changes $N$ from 10,000 to 100,000: a factor of \emph{ten},
+giving an expected SE factor $1/\sqrt{10}$. Part (e) asks the general
+question about a factor of \emph{100}. The numerical row comparison
+should not be described as a 100-fold increase.
+\end{block}
+\end{frame}
+
+\section[Q6]{Q6: Antithetic variates}
+
+\begin{frame}{Q6: Problem (15 points)}
+\small
+Use the parameters of Q5 and 10,000 independent base draws $Z_i$.
+For each, form a pair $Z_i,-Z_i$ and terminal prices $S_T^+,S_T^-$.
+\begin{enumerate}
+\item[(a)] Explain why $Z$ and $-Z$ have the same law.
+\item[(b)] Implement the pair-average estimator.
+\item[(c)] Report the price and a 95\% interval.
+\item[(d)] Compare its standard error with crude Monte Carlo.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q6(a)--(b): Pair-average estimator}
+\small
+The standard normal density satisfies $\phi(-z)=\phi(z)$, so
+$Z\stackrel{d}{=}-Z$. For each $Z_i$, define
+\[
+S_{T,i}^{\pm}=95\exp(-0.07\pm0.4Z_i),\qquad
+A_i=\frac{e^{-0.01}}2
+\left[(S_{T,i}^+-100)^++(S_{T,i}^--100)^+\right].
+\]
+Then the antithetic estimate is $\widehat c_{\rm AV}=N^{-1}\sum_iA_i$.
+Each $A_i$ has expectation $c_0$, and pairs are independent across $i$.
+The two payoffs \emph{within} a pair are dependent.
+\[
+\keybox{\widehat{\SE}_{\rm AV}=\frac{s_A}{\sqrt N}}
+\]
+Use the sample standard deviation of the \emph{10,000 pair averages},
+not the standard deviation of 20,000 individual payoffs divided by $\sqrt{20,000}$.
+\end{frame}
+
+\begin{frame}{Q6(c)--(d): Price and standard error}
+\footnotesize
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Method & Estimate & Estimated SE & 95\% lower & 95\% upper\\\midrule
+Crude Q5, 10,000 paths & \QFiveAMean & \QFiveASE & \QFiveALow & \QFiveAHigh\\
+Crude, same 10,000 $Z_i$ & \QSixCrudeMean & \QSixCrudeSE & \QSixCrudeLow & \QSixCrudeHigh\\
+Antithetic, 10,000 pairs & \QSixAVMean & \QSixAVSE & \QSixAVLow & \QSixAVHigh\\\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+The antithetic standard error is smaller in this run. The same-$Z_i$
+crude row isolates the pairing effect; the Q5 row matches the comparison
+requested in the assignment. A pair evaluates two payoffs, so a
+\emph{fixed-computational-cost} comparison would also compare against
+20,000 independent crude paths.
+\end{frame}
+
+\begin{frame}{Q6: Why pairing can reduce variance}
+\small
+Let $P^+=e^{-rT}(S_T^+-K)^+$ and
+$P^-=e^{-rT}(S_T^--K)^+$. They have the same variance $\sigma_P^2$.
+For the pair average $A=(P^++P^-)/2$,
+\[
+\Var(A)=\frac{\sigma_P^2}{2}
+\left(1+\operatorname{Corr}(P^+,P^-)\right).
+\]
+The call payoff is nondecreasing in $Z$, whereas its paired payoff is
+nonincreasing in $Z$, so their covariance is nonpositive. This makes
+the pair average less variable than a single crude payoff, and often
+less variable than the average of two independent payoffs.
+\end{frame}
+
+\section[Q7]{Q7: Control variates}
+
+\begin{frame}{Q7: Problem (10 points)}
+\small
+Let $X\sim\operatorname{Exp}(1)$, $H=X^{0.9}$, and choose the control
+$Y=X$, for which $\E[Y]=1$. Define
+\[
+H^*=X^{0.9}+c(X-1),
+\qquad c^*=-\frac{\Cov(X^{0.9},X)}{\Var(X)}.
+\]
+\begin{enumerate}
+\item[(a)] Generate 10,000 samples of $X$.
+\item[(b)] Give the crude estimate of $\E[X^{0.9}]$.
+\item[(c)] Estimate $c^*$ using sample covariance and variance.
+\item[(d)] Give the control-variate estimate.
+\item[(e)] Compare sample standard deviations.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Q7(a)--(d): Both estimators from the same samples}
+\small
+Generate independent $U_i\sim U(0,1)$ and set
+$X_i=-\ln(1-U_i)$, $H_i=X_i^{0.9}$, $Y_i=X_i$.
+The crude estimator is $\bar H$.
+\[
+\widehat c=-\frac{\sum_i(H_i-\bar H)(Y_i-\bar Y)}
+{\sum_i(Y_i-\bar Y)^2},
+\qquad
+\keybox{\widehat\theta_{\rm CV}
+=\frac1N\sum_i\left[H_i+\widehat c(Y_i-1)\right]}.
+\]
+For this fixed sample, $\widehat c=\QSevenCoeff$.
+The resulting means are $\bar H=\QSevenCrudeMean$ and
+$\widehat\theta_{\rm CV}=\QSevenCVMean$.
+\medskip
+An exact benchmark is $\E[X^{0.9}]=\Gamma(1.9)=\QSevenExact$.
+\end{frame}
+
+\begin{frame}{Q7(e): Variance reduction and exact coefficient}
+\footnotesize
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Method & Mean estimate & Sample SD of values & Estimated SE\\\midrule
+Crude $H_i$ & \QSevenCrudeMean & \QSevenCrudeSD & \QSevenCrudeSE\\
+Control $H_i+\widehat c(Y_i-1)$ & \QSevenCVMean & \QSevenCVSD & \QSevenCVSE\\\bottomrule
+\end{tabular}
+\end{center}
+\medskip
+The adjusted sample values have a much smaller standard deviation.
+For an analytic cross-check, $\E[X^p]=\Gamma(p+1)$,
+$\Var(X)=1$, and
+\[
+\Cov(X^{0.9},X)
+=\Gamma(2.9)-\Gamma(1.9)=0.9\Gamma(1.9),
+\quad c^*=-0.9\Gamma(1.9)=\QSevenExactCoeff.
+\]
+The sample coefficient is close to this optimum. Because $\widehat c$
+is fitted on the same sample, the exact fixed-$c$ unbiasedness statement
+does not apply literally at finite $N$; the effect is small here.
+\end{frame}
+
+\appendix
+
+\begin{frame}{How to reproduce the numerical answers}
+\small
+From the \texttt{Chapter 5} directory, run
+\begin{center}
+\texttt{python 05\_tutorial.py}
+\end{center}
+with NumPy and Matplotlib available. The script writes
+\texttt{05\_results.tex}, \texttt{figures/q2\_exponential.png}, and
+\texttt{figures/q3\_rejection.png}. Then compile
+\begin{center}
+\texttt{pdflatex 05\_tutorial.tex}
+\end{center}
+twice. The numerical estimates use independent fixed seeds for each
+question and nested samples within Q4 and Q5.
+\end{frame}
+
+\end{document}
