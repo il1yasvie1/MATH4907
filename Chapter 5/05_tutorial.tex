@@ -20,6 +20,10 @@
 \newcommand{\Cov}{\operatorname{Cov}}
 \newcommand{\SE}{\operatorname{SE}}
 \newcommand{\pos}[1]{(#1)^+}
+\newcommand{\redstar}{\textcolor{red}{*}}
+
+
+
 \graphicspath{{figures/}}
 \input{05_results.tex}
 \title[MATH4907 Tutorial 5]{MATH4907 Tutorial 5}
@@ -30,18 +34,18 @@
 \begin{document}
 \maketitle
 
-\section[Q1]{Q1: Pseudorandom numbers}
+\section[Q1]{Q1: Linear Congruential Generator}
 
-\begin{frame}{Q1: Problem (10 points)}
+\begin{frame}{Q1: Problem}
 \small
 Starting from $X_0=5$, consider
 \[
 X_i=(7X_{i-1}+3)\bmod16.
 \]
 \begin{enumerate}
-\item[(a)] Generate $X_1,\ldots,X_{20}$.
-\item[(b)] Compute $U_i=X_i/16\in[0,1)$.
-\item[(c)] Use $Y_i=2+3U_i$ to produce samples in $[2,5)$.
+\item[(a)] \redstar Generate $X_1,\ldots,X_{20}$.
+\item[(b)] \redstar Compute $U_i=X_i/16\in[0,1)$.
+\item[(c)] \redstar Use $Y_i=2+3U_i$ to produce samples in $[2,5)$.
 \item[(d)] Explain why these numbers are pseudorandom.
 \end{enumerate}
 \end{frame}
@@ -60,27 +64,14 @@ Y_i=2+3U_i&3.1250&4.4375&4.6250&2.9375
 Each row's four entries repeat \keytext{five times}, yielding exactly 20
 values of $X_i$, $U_i$, and $Y_i$. In particular $X_4=X_0=5$, so the
 sequence cannot produce more than four distinct values with this seed.
-\begin{block}{Why the transformation works}
-For an ideal $U\sim U[0,1)$, $2+3U\sim U[2,5)$. The four LCG values above
-only approximate this ideal very poorly; this toy generator is for illustrating
-the recurrence, not for the later simulations.
+\begin{block}{Why pseudo-random?}
+Initial seed ($X_0=5$) and deterministic algorithm ($X_i=(7X_{i-1}+3)\bmod16$).
 \end{block}
 \end{frame}
 
-\begin{frame}{Q1(d): Why pseudorandom?}
-\small
-A computer applies a deterministic recurrence to a finite state. If the
-algorithm, parameters, and seed are known, every later value is determined.
-Finite state also implies that a sequence eventually repeats.
-\textcolor{red}{Pseudorandom} means that suitable algorithms produce sequences whose
-statistical behavior resembles random draws for practical simulation, while
-remaining reproducible. Hardware entropy can supply true physical randomness,
-but the LCG in this question has none.
-\end{frame}
+\section[Q2]{Q2: Inverse Cumulative Distribution Function}
 
-\section[Q2]{Q2: Inverse transform}
-
-\begin{frame}{Q2: Problem (10 points)}
+\begin{frame}{Q2: Problem}
 \small
 Let $X$ be exponential with mean $\mu=2$ and density
 $f(x)=\tfrac12e^{-x/2}$ for $x\geq0$.
@@ -88,28 +79,48 @@ $f(x)=\tfrac12e^{-x/2}$ for $x\geq0$.
 \item[(a)] Derive its cumulative distribution function.
 \item[(b)] Derive $X=-2\ln(1-U)$ for $U\sim U(0,1)$.
 \item[(c)] Explain the equivalent formula $X=-2\ln U$.
-\item[(d)] Generate 10,000 values; compare a normalized histogram with the
+\item[(d)] \redstar Generate 10,000 values; compare a normalized histogram with the
 true density and report sample mean and variance.
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Q2(a)--(c): Distribution and inverse transform}
+\begin{frame}{Q2(a)--(c): CDF and inverse transform}
 \small
-For $x<0$, $F(x)=0$. For $x\geq0$,
+For $x<0$, $F_X(x)=0$. For $x\geq0$,
 \[
-F(x)=\int_0^x\frac12e^{-t/2}\,dt=1-e^{-x/2}.
+F_X(x)=\int_0^x f_X(t)\,dt=\int_0^x\frac12e^{-t/2}\,dt=1-e^{-x/2}.
 \]
-Setting $U=F(X)$ and solving for $X$ gives
+Setting $U=F_X(X)$ and solving for $X$ gives
 \[
 U=1-e^{-X/2}
 \quad\Longrightarrow\quad
-\keybox{X=F^{-1}(U)=-2\ln(1-U)}.
+\keybox{X=F_X^{-1}(U)=-2\ln(1-U)}.
 \]
 Since $U\sim U(0,1)$ implies $1-U\sim U(0,1)$, the alternative
-$-2\ln U$ has the same exponential distribution. In floating-point code,
-\texttt{-2*log1p(-U)} evaluates the first expression accurately near zero.
-\medskip
-Theoretical checks: $\E[X]=2$ and $\Var(X)=4$.
+$-2\ln U$ has the same exponential distribution.
+For a sample $X_1,\ldots,X_N$, $N\ge2$, define
+\[
+\mu_{X,N}=\frac1N\sum_{i=1}^N X_i,
+\qquad
+\sigma_{X,N}^2=\frac1{N-1}\sum_{i=1}^N(X_i-\mu_{X,N})^2.
+\]
+The sample standard deviation is $\sigma_{X,N}=\sqrt{\sigma_{X,N}^2}$.
+\end{frame}
+
+\begin{frame}{Q2: Theorem: Probability integral transform}
+\small
+If $X$ has a continuous CDF $F_X$, then
+\[
+U=F_X(X)\sim U(0,1).
+\]
+For $0<u<1$, continuity and monotonicity give
+\[
+\Pr(U<u)=\Pr(F_X(X)<u)=\Pr(X<F_X^{-1}(u))
+=F_X(F_X^{-1}(u))=u.
+\]
+Conversely, if $U\sim U(0,1)$ and
+$F_X^{-1}(u)=\inf\{x\in\mathbb R:F_X(x)\ge u\}$, then
+$X=F_X^{-1}(U)$ has CDF $F_X$.
 \end{frame}
 
 \begin{frame}{Q2(d): Simulation with 10,000 samples}
@@ -128,26 +139,53 @@ Sample variance & \QTwoVariance\\
 Theoretical mean & 2\\
 Theoretical variance & 4\\\bottomrule
 \end{tabular}
-\medskip
-The histogram is normalized as a density, so its area is approximately one.
-The solid curve is $f(x)=\frac12e^{-x/2}$.
 \end{columns}
 \end{frame}
 
-\section[Q3]{Q3: Acceptance--rejection}
-
-\begin{frame}{Q3: Problem (20 points)}
+\begin{frame}{Q2: Inverse transform for the normal distribution}
 \small
-Sample from $f(x)=3x^2$ on $[0,1]$ using acceptance--rejection,
-\emph{not} inverse transform. Take proposal $g(x)=2x$ and
+For $X\sim N(\mu,\sigma^2)$, the PDF is explicit:
+\[
+f_X(x)=\frac{1}{\sigma\sqrt{2\pi}}
+\exp\!\left[-\frac12\left(\frac{x-\mu}{\sigma}\right)^2\right].
+\]
+Its CDF is defined by integrating this density,
+\[
+F_X(x)=\int_{-\infty}^x f_X(t)\,dt,
+\]
+but this integral has no elementary closed-form expression. Numerical methods such as quadrature can approximate $F_X(x)$, and numerical root-finding can then approximate $F_X^{-1}(u)$. In practice, specialized normal quantile algorithms provide this inverse efficiently.
+\begin{block}{Takeaway}
+Inverse transform sampling applies whenever the CDF can be evaluated and inverted. For the normal distribution, this requires numerical approximations rather than an elementary inverse formula.
+\end{block}
+\end{frame}
+
+\section[Q3]{Q3: Acceptance--Rejection Sampling}
+
+\begin{frame}{Q3: Problem}
+\small
+Sample from $f(x)=3x^2$ on $[0,1]$ using acceptance--rejection. Take the proposal density $g(x)=2x$ and
 $X'=\sqrt V$ with $V\sim U(0,1)$.
 \begin{enumerate}
-\item[(a)] Find the smallest envelope constant $\alpha$.
+\item[(a)] Find the smallest constant $\alpha$.
 \item[(b)] Simplify $f(X')/(\alpha g(X'))$.
 \item[(c)] Give pseudocode for $n$ accepted samples.
-\item[(d)] Produce 10,000 accepted samples and compare with $f$.
-\item[(e)] Compare empirical and theoretical efficiencies.
+\item[(d)] \redstar Produce 10,000 accepted samples and compare with $f$.
+\item[(e)] \redstar Compare empirical and theoretical efficiencies.
 \end{enumerate}
+\end{frame}
+
+\begin{frame}{Q3: Algorithm: Rejection sampling}
+\small
+To generate samples from a target density $f_X$:
+\begin{enumerate}
+\item Choose a proposal density $f_Y$ and a finite constant $c$ such that
+      $f_X(x)\le c f_Y(x)$ almost everywhere.
+\item Draw $Y$ from $f_Y$ and draw $U\sim U(0,1)$ independently.
+\item If $U\le \dfrac{f_X(Y)}{c f_Y(Y)}$, return $Y$ as a target sample.
+      Otherwise, repeat from step 2.
+\end{enumerate}
+The acceptance probability is $1/c$. A good proposal is easy to sample,
+covers the target support, and makes the smallest possible valid $c$.
 \end{frame}
 
 \begin{frame}{Q3(a)--(b): Envelope and acceptance rule}
@@ -186,8 +224,6 @@ while len(accepted) < n:
         accepted.append(x_proposal)
 efficiency = n / proposals
 \end{lstlisting}
-Each rejected pair is discarded. Stop only after $n$ proposals have been
-\emph{accepted}; the proposal count is generally larger than $n$.
 \end{frame}
 
 \begin{frame}{Q3(d)--(e): Histogram and efficiency}
@@ -206,23 +242,64 @@ Total proposals & \QThreeProposals\\
 Empirical efficiency & \QThreeEfficiency\\
 Theoretical efficiency & $2/3$\\\bottomrule
 \end{tabular}
-\medskip
-The normalized histogram follows the target curve $f(x)=3x^2$.
-The empirical acceptance fraction is close to $2/3$.
 \end{columns}
 \end{frame}
 
-\section[Q4]{Q4: Monte Carlo integration}
+\begin{frame}{Q3: Example with a beta density}
+\small
+Consider
+\[
+f_X(x)=20x(1-x)^3,\qquad 0\le x\le1.
+\]
+Use the uniform proposal $f_Y(x)=1$ on $[0,1]$. The target is normalized because
+\[
+\int_0^1 20x(1-x)^3\,dx=1.
+\]
+The derivative of $f_X$ is $20(1-x)^2(1-4x)$, so its maximum occurs at
+$x=1/4$:
+\[
+c=\max_{[0,1]}\frac{f_X(x)}{f_Y(x)}
+=f_X\!\left(\frac14\right)=\frac{135}{64}.
+\]
+Draw $Y\sim U(0,1)$ and accept when
+\[
+U\le \frac{20Y(1-Y)^3}{135/64}.
+\]
+The theoretical acceptance probability is $64/135\approx0.474$.
+\end{frame}
 
-\begin{frame}{Q4: Problem (15 points)}
+\begin{frame}{Q3: Example with a gamma density}
+\small
+Consider the normalized density
+\[
+f_X(x)=K\sqrt{x}\,e^{-x},\qquad x\ge0.
+\]
+Since $\int_0^\infty x^{1/2}e^{-x}\,dx=\Gamma(3/2)=\sqrt\pi/2$,
+normalization requires $K=2/\sqrt\pi$. Choose an exponential proposal
+with rate $1/2$,
+\[
+f_Y(x)=\frac12e^{-x/2},\qquad x\ge0.
+\]
+The density ratio is
+\[
+\frac{f_X(x)}{f_Y(x)}=\frac4{\sqrt\pi}\sqrt{x}\,e^{-x/2}.
+\]
+Its maximum occurs at $x=1$, giving $c=4/\sqrt{\pi e}$ and acceptance
+probability $1/c=\sqrt{\pi e}/4\approx0.731$. Draw $Y=-2\ln V$ for
+$V\sim U(0,1)$ and accept when $U\le f_X(Y)/(c f_Y(Y))$.
+\end{frame}
+
+\section[Q4]{Q4: Monte Carlo Integration}
+
+\begin{frame}{Q4: Problem}
 \small
 Estimate $I=\int_0^1e^{-x^2}\,dx$ by drawing $X_i\sim U(0,1)$.
 \begin{enumerate}
 \item[(a)] Derive the Monte Carlo estimator.
-\item[(b)] Report estimates for $N=100,1{,}000,10{,}000,100{,}000$.
-\item[(c)] For each $N$, use the sample standard deviation of $e^{-X_i^2}$
+\item[(b)] \redstar Report estimates for $N=100,1{,}000,10{,}000,100{,}000$.
+\item[(c)] \redstar For each $N$, use the sample standard deviation of $e^{-X_i^2}$
 to form an approximate 95\% confidence interval.
-\item[(d)] Explain how its width changes with $N$.
+\item[(d)] \redstar Explain how 95\% CI width changes with $N$.
 \end{enumerate}
 \end{frame}
 
@@ -278,9 +355,9 @@ width by about $1/\sqrt{10}\approx0.316$; multiplying $N$ by 100
 shrinks it by about $1/10$.
 \end{frame}
 
-\section[Q5]{Q5: Crude Monte Carlo call pricing}
+\section[Q5]{Q5: Monte Carlo Call Pricing}
 
-\begin{frame}{Q5: Problem (20 points)}
+\begin{frame}{Q5: Problem}
 \small
 Under the risk-neutral Black--Scholes model, let
 \[
@@ -291,9 +368,10 @@ with $S_0=95$, $K=100$, $r=0.01$, $\sigma=0.4$, $T=1$.
 The European call price is $c_0=e^{-rT}\E[(S_T-K)^+]$.
 \begin{enumerate}
 \item[(a)] Derive the crude Monte Carlo estimator.
-\item[(b)--(c)] Estimate with $N=10{,}000$ and give a 95\% interval.
-\item[(d)] Repeat with $N=100{,}000$ and compare.
-\item[(e)] Explain the $N^{-1/2}$ standard-error scaling.
+\item[(b)] \redstar Estimate the option price using N= 10,000 simulations.
+\item[(c)] \redstar Construct a 95\% CI for the option price.
+\item[(d)] \redstar Repeat with $N=100{,}000$ and compare.
+\item[(e)] \redstar Explain the $N^{-1/2}$ standard-error scaling.
 \end{enumerate}
 \end{frame}
 
@@ -306,12 +384,12 @@ W_i=e^{-0.01}(S_T^{(i)}-100)^+.
 \]
 Then
 \[
-\keybox{\widehat c_N=\frac1N\sum_{i=1}^N W_i
+\keybox{\widehat c_N=\frac1N\sum_{i=1}^N H_i
 =e^{-rT}\frac1N\sum_{i=1}^N(S_T^{(i)}-K)^+}.
 \]
-The estimated standard error is $s_W/\sqrt N$, where $s_W$ is the sample
+The estimated standard error is $s_H/\sqrt N$, where $s_H$ is the sample
 standard deviation of the \emph{discounted} payoffs. Hence the 95\%
-interval is $\widehat c_N\pm1.96s_W/\sqrt N$.
+interval is $\widehat c_N\pm1.96s_H/\sqrt N$.
 \end{frame}
 
 \begin{frame}{Q5(b)--(d): Numerical call estimates}
@@ -334,39 +412,51 @@ closer to the check value; a larger $N$ does not guarantee that the
 realized error decreases on every run.
 \end{frame}
 
-\begin{frame}{Q5(e): Scaling and a wording inconsistency}
+\begin{frame}{Q5(e): Error Scaling}
 \small
-Since $\Var(\widehat c_N)=\Var(W)/N$,
+Since $\Var(\widehat c_N)=\Var(H)/N$,
 \[
 \SE(\widehat c_{100N})=\frac1{10}\SE(\widehat c_N)
 \quad\text{when the payoff variance is fixed.}
 \]
 Thus reducing standard error by a factor of 10 generally requires
 \keytext{100 times as many paths}.
-\medskip
-\begin{block}{Read parts (d) and (e) separately}
-Part (d) changes $N$ from 10,000 to 100,000: a factor of \emph{ten},
-giving an expected SE factor $1/\sqrt{10}$. Part (e) asks the general
-question about a factor of \emph{100}. The numerical row comparison
-should not be described as a 100-fold increase.
-\end{block}
 \end{frame}
 
-\section[Q6]{Q6: Antithetic variates}
+\section[Q6]{Q6: Antithetic Variates}
 
-\begin{frame}{Q6: Problem (15 points)}
+\begin{frame}{Q6: Problem}
 \small
 Use the parameters of Q5 and 10,000 independent base draws $Z_i$.
 For each, form a pair $Z_i,-Z_i$ and terminal prices $S_T^+,S_T^-$.
 \begin{enumerate}
 \item[(a)] Explain why $Z$ and $-Z$ have the same law.
-\item[(b)] Implement the pair-average estimator.
-\item[(c)] Report the price and a 95\% interval.
-\item[(d)] Compare its standard error with crude Monte Carlo.
+\item[(b)] Implement the antithetic variates estimator.
+\item[(c)] \redstar Compute the estimated option price and a 95\% CI.
+\item[(d)] \redstar Compare its standard error with crude Monte Carlo.
 \end{enumerate}
 \end{frame}
 
-\begin{frame}{Q6(a)--(b): Pair-average estimator}
+\begin{frame}{Q6: Algorithm: Antithetic variates}
+\small
+To estimate $\theta=\E[h(X)]$:
+\begin{enumerate}
+\item Generate $N$ independent pairs $(X_i,X_i')$ with the same marginal
+      distribution as $X$, chosen so that $h(X_i)$ and $h(X_i')$ are negatively
+      correlated. Common examples are $(U_i,1-U_i)$ for uniform draws and
+      $(Z_i,-Z_i)$ for standard normal draws.
+\item Form the pair averages
+      $A_i=\tfrac12[h(X_i)+h(X_i')]$ and estimate
+      $\theta$ by $\widehat\theta_{\rm AV}=\mu_{A,N}$.
+\item Estimate the standard error using the sample standard deviation of the
+      $N$ pair averages divided by $\sqrt N$. Form a 95\% confidence interval
+      as the estimate plus or minus 1.96 times this estimated standard error.
+\end{enumerate}
+If each payoff has variance $\sigma_H^2$ and within-pair correlation $\rho$,
+then $\sigma_A^2=\sigma_H^2(1+\rho)/2$. Negative correlation reduces variance.
+\end{frame}
+
+\begin{frame}{Q6(a)--(b): Antithetic variates estimator}
 \small
 The standard normal density satisfies $\phi(-z)=\phi(z)$, so
 $Z\stackrel{d}{=}-Z$. For each $Z_i$, define
@@ -419,9 +509,9 @@ the pair average less variable than a single crude payoff, and often
 less variable than the average of two independent payoffs.
 \end{frame}
 
-\section[Q7]{Q7: Control variates}
+\section[Q7]{Q7: Control Variates}
 
-\begin{frame}{Q7: Problem (10 points)}
+\begin{frame}{Q7: Problem}
 \small
 Let $X\sim\operatorname{Exp}(1)$, $H=X^{0.9}$, and choose the control
 $Y=X$, for which $\E[Y]=1$. Define
@@ -430,12 +520,29 @@ H^*=X^{0.9}+c(X-1),
 \qquad c^*=-\frac{\Cov(X^{0.9},X)}{\Var(X)}.
 \]
 \begin{enumerate}
-\item[(a)] Generate 10,000 samples of $X$.
-\item[(b)] Give the crude estimate of $\E[X^{0.9}]$.
-\item[(c)] Estimate $c^*$ using sample covariance and variance.
-\item[(d)] Give the control-variate estimate.
-\item[(e)] Compare sample standard deviations.
+\item[(a)] \redstar Generate 10,000 samples from $X\sim \operatorname{Exp}(1)$.
+\item[(b)] \redstar Estimate $\E[X^{0.9}]$ using crude Monte Carlo.
+\item[(c)] \redstar Estimate $c^*$ using sample covariance and variance.
+\item[(d)] \redstar Give the control variate estimator.
+\item[(e)] \redstar Compare sample standard deviations.
 \end{enumerate}
+\end{frame}
+
+\begin{frame}{Q7: Algorithm: Control variates}
+\small
+To estimate $\theta=\E[H]$, choose a variable $Y$ from the same simulation
+with known mean $\mu_Y=\E[Y]$ and strong correlation with $H$.
+\begin{enumerate}
+\item Generate independent pairs $(H_i,Y_i)$.
+\item Choose a coefficient $c$. The variance-minimizing value is
+      $c^*=-\Cov(H,Y)/\sigma_Y^2$. If the covariance and variance are unknown,
+      estimate them from the simulated sample.
+\item Form $H_i^*=H_i+c(Y_i-\mu_Y)$ and estimate $\theta$ by their sample mean
+      $\widehat\theta_{\rm CV}=\mu_{H^*,N}$. Estimate its standard error from
+      the sample standard deviation of $H_i^*$ divided by $\sqrt N$.
+\end{enumerate}
+For fixed $c$, $\E[H_i^*]=\E[H]$. At $c=c^*$,
+$\sigma_{H^*}^2=\sigma_H^2(1-\rho_{H,Y}^2)$.
 \end{frame}
 
 \begin{frame}{Q7(a)--(d): Both estimators from the same samples}
@@ -481,22 +588,15 @@ is fitted on the same sample, the exact fixed-$c$ unbiasedness statement
 does not apply literally at finite $N$; the effect is small here.
 \end{frame}
 
-\appendix
+\section*{End}
 
-\begin{frame}{How to reproduce the numerical answers}
-\small
-From the \texttt{Chapter 5} directory, run
-\begin{center}
-\texttt{python 05\_tutorial.py}
-\end{center}
-with NumPy and Matplotlib available. The script writes
-\texttt{05\_results.tex}, \texttt{figures/q2\_exponential.png}, and
-\texttt{figures/q3\_rejection.png}. Then compile
-\begin{center}
-\texttt{pdflatex 05\_tutorial.tex}
-\end{center}
-twice. The numerical estimates use independent fixed seeds for each
-question and nested samples within Q4 and Q5.
+\begin{frame}{}
+\centering
+\vfill
+{\Huge\color{blue!70!black}\textbf{Thank You!}}
+\vspace{1cm}
+{\Large Questions?}
+\vfill
 \end{frame}
 
 \end{document}

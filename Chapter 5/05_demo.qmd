@@ -1,0 +1,571 @@
+---
+title: "Monte Carlo Method"
+subtitle: "Sampling methods and variance reduction"
+author: "Sanyang Liu"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: true
+    code-summary: "Show Python code"
+    code-tools: true
+    theme: cosmo
+    self-contained: true
+execute:
+  warning: false
+---
+
+Monte Carlo starts with two practical questions. How can we generate draws from a target distribution? Once we can sample from it, how can we estimate an expectation more precisely for the same amount of computation? The examples below use NumPy and compare the simulation results with known benchmarks.
+
+```{python}
+#| include: false
+from math import erf, erfc, exp, gamma, log, pi, sqrt
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+plt.rcParams.update({"figure.dpi": 120, "axes.grid": True, "grid.alpha": .2,
+                     "axes.spines.top": False, "axes.spines.right": False})
+
+def stats(v):
+    v = np.asarray(v)
+    mean, sd = float(v.mean()), float(v.std(ddof=1))
+    se = sd/sqrt(len(v))
+    return mean, sd, se, mean-1.96*se, mean+1.96*se
+
+def running(v, ns):
+    v, n = np.asarray(v), np.asarray(ns)
+    s, s2 = np.cumsum(v), np.cumsum(v*v)
+    mean = s[n-1]/n
+    sd = np.sqrt(np.maximum((s2[n-1]-n*mean**2)/(n-1), 0))
+    return mean, sd, 1.96*sd/np.sqrt(n)
+
+def table(rows, cols):
+    display(pd.DataFrame(rows, columns=cols).round(6))
+```
+
+# Sampling methods
+
+Uniform draws are the starting point for both inverse transform and rejection sampling. A linear congruential generator gives us a simple way to see how a stream of pseudo-random uniforms is made.
+
+## Linear congruential generators
+
+::: {.callout-note title="Algorithm: Linear congruential generator" icon="false"}
+Choose an integer modulus $m\geq 2$, multiplier $a$, increment $c$, and seed $X_0\in\{0,\ldots,m-1\}$. For $i\geq 1$, compute
+$$
+X_i=(aX_{i-1}+c)\bmod m,
+\qquad
+U_i=\frac{X_i}{m}.
+$$
+The values $U_i\in[0,1)$ are **pseudo-random numbers** intended to approximate draws from $\mathrm{Uniform}(0,1)$.
+:::
+
+**A generator with a short period.** With $(a,c,m)=(7,3,16)$ and seed $X_0=5$, the generator returns to the seed after four steps. The table also shows the rescaling $Y_i=2+3U_i$ to $[2,5)$, which preserves the four-step cycle.
+
+```{python}
+def lcg(seed, a, c, m, n):
+    out = np.empty(n, dtype=np.int64)
+    x = seed
+    for j in range(n):
+        x = (a * x + c) % m
+        out[j] = x
+    return out
+
+seed = 5
+a = 7
+c = 3
+m = 16
+n = 20
+
+X = lcg(seed, a, c, m, n)
+U = X / m
+Y = 2 + 3 * U
+```
+
+
+```{python}
+#| echo: false
+rows = [{"Indices <i>i</i>": "0 (seed)", "<i>X</i><sub>i</sub>": seed,
+         "<i>U</i><sub>i</sub>": "—", "<i>Y</i><sub>i</sub>": "—"}]
+for k in range(1, 5):
+    rows.append({
+        "Indices <i>i</i>": ", ".join(str(i) for i in range(k, n + 1, 4)),
+        "<i>X</i><sub>i</sub>": int(X[k - 1]),
+        "<i>U</i><sub>i</sub>": f"{U[k - 1]:.4f}",
+        "<i>Y</i><sub>i</sub>": f"{Y[k - 1]:.4f}",
+    })
+display(pd.DataFrame(rows).style.hide(axis="index"))
+```
+
+Changing the parameters to $(a,c,m)=(5,1,2^{16})$ gives a full period of $65{,}536$ for this seed. The histogram checks how evenly the values fill $[0,1)$, and the scatter plot shows whether successive pairs form visible patterns.
+
+```{python}
+def period(seed, a, c, m):
+    x = seed
+    for j in range(1, m + 2):
+        x = (a * x + c) % m
+        if x == seed:
+            return j
+    raise ValueError("No return within m+1 steps")
+
+print("Period with modulus 16:", period(5, 7, 3, 16))
+print("Period with modulus 65,536:", period(5, 5, 1, 2**16))
+```
+
+```{python}
+#| label: fig-lcg
+#| echo: false
+#| fig-cap: "Histograms (left) and successive pairs (right) for two LCGs and NumPy's default generator. The longer-period LCG fills the histogram more evenly, but its successive pairs form visible bands."
+bad = lcg(5, 7, 3, 16, 10_000) / 16
+better = lcg(5, 5, 1, 2**16, 10_000) / 2**16
+good = np.random.default_rng(490701).random(10_000)
+fig, ax = plt.subplots(3, 2, figsize=(10, 12))
+
+generators = [(bad, "LCG with period 4"),
+              (better, "LCG with period 65,536"),
+              (good, "NumPy default_rng")]
+for row, (v, name) in enumerate(generators):
+    ax[row, 0].hist(v, bins=np.linspace(0, 1, 21), density=True,
+                    color="#4C78A8", edgecolor="white")
+    ax[row, 0].axhline(1, color="#D1495B", lw=2, label="Uniform density")
+    ax[row, 0].set(title=name, xlabel="$U_i$", ylabel="Density", xlim=(0, 1))
+    ax[row, 0].legend()
+    ax[row, 1].scatter(v[:2000], v[1:2001], s=7, alpha=.35)
+    ax[row, 1].set(xlabel="$U_i$", ylabel="$U_{i+1}$",
+                   xlim=(0, 1), ylim=(0, 1))
+    ax[row, 1].set_aspect("equal", adjustable="box")
+
+plt.tight_layout()
+plt.show()
+```
+
+## Inverse transform sampling
+
+Write $F_X(x)=\Pr(X\le x)$ for the cumulative distribution function (CDF) of $X$. If $X$ has a probability density function (PDF) $f_X$, then $F_X(x)=\int_{-\infty}^x f_X(t)\,dt$.
+
+::: {.callout-note title="Theorem: Inverse transform sampling" icon="false"}
+For a continuous random variable $X$ with CDF $F_X$, the random variable $U=F_X(X)$ is uniform on $[0,1]$. Define
+$$
+F_X^{-1}(u)=\inf\{x\in\mathbb R:F_X(x)\ge u\},\qquad 0<u<1.
+$$
+Since $F_X$ is continuous, $F_X(F_X^{-1}(u))=u$ and $\Pr(X<x)=F_X(x)$. Hence
+$$
+\Pr(U<u)=\Pr(F_X(X)<u)=\Pr(X<F_X^{-1}(u))=F_X(F_X^{-1}(u))=u.
+$$
+:::
+
+The sampling algorithm goes in the reverse direction. For any CDF $F_X$, $F_X^{-1}(u)\le x$ exactly when $u\le F_X(x)$. Thus a uniform draw $U$ gives $\Pr(F_X^{-1}(U)\le x)=\Pr(U\le F_X(x))=F_X(x)$.
+
+::: {.callout-note title="Algorithm: Inverse transform sampling" icon="false"}
+1. Obtain the target CDF $F_X$. If the PDF $f_X$ is given, integrate it to find $F_X$.
+2. Find the quantile function $F_X^{-1}$. When $F_X$ is continuous and strictly increasing on its support, solve $F_X(x)=u$ for $x$.
+3. Draw independent $U_i\sim\mathrm{Uniform}(0,1)$ and return $X_i=F_X^{-1}(U_i)$.
+:::
+
+**Exponential waiting times.** For $X\sim\mathrm{Exp}(\lambda)$ with $\lambda>0$, the density and CDF on $x\ge 0$ are
+$$
+f_X(x)=\lambda e^{-\lambda x},\qquad F_X(x)=1-e^{-\lambda x}.
+$$
+Both are zero for $x<0$. Solving $F_X(x)=u$ gives
+$$
+F_X^{-1}(u)=-\frac{\log(1-u)}{\lambda}.
+$$
+
+::: {.callout-note title="Definitions: Sample mean and sample variance" icon="false"}
+For a sample $X_1,\ldots,X_N$ from the distribution of $X$ with $N\ge 2$, define the sample mean and sample variance by
+$$
+\mu_{X,N}=\frac{1}{N}\sum_{i=1}^N X_i,
+\qquad
+\sigma_{X,N}^2=\frac{1}{N-1}\sum_{i=1}^N(X_i-\mu_{X,N})^2.
+$$
+The sample standard deviation is $\sigma_{X,N}=\sqrt{\sigma_{X,N}^2}$. The corresponding population quantities are $\mu_X=\mathbb E[X]$ and $\sigma_X^2=\operatorname{Var}(X)=\mathbb E[(X-\mu_X)^2]$ when these moments exist.
+:::
+
+With $\lambda=1/2$, the theoretical mean is $2$ and the variance is $4$. The table compares these values with the sample mean and sample variance from 10,000 draws.
+
+```{python}
+rng = np.random.default_rng(490702)
+x2 = -2*np.log1p(-rng.random(10_000))
+table([[x2.mean(),x2.var(ddof=1),2,4]],
+      ["Sample mean","Sample variance","True mean","True variance"])
+```
+
+```{python}
+#| label: fig-inverse-transform
+#| echo: false
+#| fig-cap: "Histogram of 10,000 inverse transform samples from Exp(1/2), overlaid with the theoretical exponential density."
+t = np.linspace(0,16,400)
+fig,ax=plt.subplots(figsize=(8,4))
+ax.hist(x2,bins=55,density=True,color="#4C78A8",alpha=.75,label="Inverse transform sampling")
+ax.plot(t,.5*np.exp(-t/2),color="#D1495B",lw=2.5,label=r"$f_X(x)=\frac{1}{2}e^{-x/2}$")
+ax.set(xlabel="$x$",ylabel="Density",xlim=(0,16)); ax.legend(); plt.show()
+```
+
+## Rejection sampling
+
+When the target quantile is hard to evaluate, draw from an easier proposal and use an acceptance probability to recover the target density.
+
+::: {.callout-note title="Algorithm: Rejection sampling" icon="false"}
+1. Choose a proposal density $f_Y$ and a finite constant $c$ such that $f_X(x)\le c f_Y(x)$ almost everywhere.
+2. Draw $Y$ from the proposal and $U\sim\mathrm{Uniform}(0,1)$ independently.
+3. If $U\le f_X(Y)/(c f_Y(Y))$, return $Y$. Otherwise, repeat step 2.
+:::
+
+::: {.callout-tip title="Choosing the proposal density $f_Y$" icon="false"}
+Choose a proposal that is easy to sample, is positive wherever the target is positive (up to sets of measure zero), and keeps $f_X/f_Y$ bounded. A uniform density is a first candidate for a bounded target density on a finite interval. On a half-line, try a shifted exponential if its tail is slow enough. On $\mathbb R$, try a normal for a light-tailed target or a Student $t$ for heavier tails. Check the ratio for the chosen parameters.
+:::
+
+::: {.callout-tip title="Choosing the constant $c$" icon="false"}
+Use the smallest bound that holds almost everywhere:
+$$
+c_* = \operatorname*{ess\,sup}_{x:\, f_Y(x)>0}\frac{f_X(x)}{f_Y(x)}.
+$$
+For a smooth ratio, find the supremum by checking stationary points, interval endpoints, and tail limits. The acceptance probability is $1/c$, so a smaller valid $c$ means fewer rejections.
+:::
+
+The density of proposing and accepting a value near $y$ is $f_Y(y)\,f_X(y)/(c f_Y(y))=f_X(y)/c$. Integrating gives acceptance probability $1/c$. Conditioning on acceptance therefore gives density $f_X$.
+
+**A quadratic density on $[0,1]$.** Take $f_X(x)=3x^2$ and $f_Y(x)=2x$ on this interval.
+
+Here $f_X(x)/f_Y(x)=3x/2$ for $0<x\le 1$. The derivative is $3/2>0$, so the maximum is at $x=1$ and $c_*=3/2$. Draw $Y=\sqrt V$ with $V\sim\mathrm{Uniform}(0,1)$ and accept when $U\le Y$. A uniform proposal instead gives $c_*=3$ and accepts $1/3$ of proposals. If the target inverse CDF is available, here $X=U^{1/3}$, inverse transform sampling returns a sample on every draw.
+
+```{python}
+rng = np.random.default_rng(490703)
+accepted, progress = [], []
+proposals = 0
+while len(accepted)<10_000:
+    candidate=sqrt(rng.random())
+    proposals+=1
+    if rng.random()<=candidate:
+        accepted.append(candidate)
+    progress.append(len(accepted))
+accepted=np.asarray(accepted)
+table([[len(accepted),proposals,len(accepted)/proposals,2/3]],
+      ["Accepted","Proposals","Empirical rate","Theory"])
+```
+
+```{python}
+#| label: fig-rejection-sampling
+#| echo: false
+#| fig-cap: "From left to right, the panels show the accepted draws against the target density, the envelopes from two proposals, and the observed acceptance rate approaching 2/3 for the linear proposal."
+grid=np.linspace(0,1,400)
+fig,ax=plt.subplots(1,3,figsize=(13,3.5))
+ax[0].hist(accepted,bins=40,density=True,color="#4C78A8",alpha=.75)
+ax[0].plot(grid,3*grid**2,color="#D1495B",lw=2)
+ax[0].set(xlabel="$x$",ylabel="Density",title="Accepted samples")
+ax[1].plot(grid,3*grid**2,label=r"$f_X(x)=3x^2$",lw=2)
+ax[1].plot(grid,3*grid,label=r"$c f_Y(x)=3x$",lw=2)
+ax[1].plot(grid,np.full_like(grid,3),label="Uniform envelope = 3",ls="--")
+ax[1].set(xlabel="$x$",ylabel="Height",title="Envelope choice"); ax[1].legend(fontsize=8)
+check=np.unique(np.geomspace(10,proposals,400).astype(int))
+ax[2].plot(check,np.asarray(progress)[check-1]/check)
+ax[2].axhline(2/3,color="#D1495B",ls="--",label="Theory: 2/3")
+ax[2].set(xlabel="Proposals",ylabel="Accepted / proposed",xscale="log",ylim=(0,1))
+ax[2].legend(fontsize=8); plt.tight_layout(); plt.show()
+```
+
+# Variance reduction
+
+Start with crude Monte Carlo as a baseline. Its standard error scales as $\sigma_H/\sqrt N$, where $\sigma_H$ measures how much a single simulated value fluctuates. The methods that follow change how we generate or combine values to reduce the estimator variance at a comparable simulation cost.
+
+## Crude Monte Carlo integration
+
+::: {.callout-note title="Algorithm: Crude Monte Carlo" icon="false"}
+Write the quantity of interest as an expectation $\theta=\mathbb E[h(X)]$. To integrate $g$ over $[a,b]$, for example, choose $X\sim\mathrm{Uniform}(a,b)$ and set $h(X)=(b-a)g(X)$.
+
+1. Draw independent samples $X_1,\ldots,X_N$ from the distribution of $X$.
+2. Evaluate $H_i=h(X_i)$ and estimate $\theta$ by their sample mean $\widehat\theta_N=\mu_{H,N}$.
+3. Use the sample variance $\sigma_{H,N}^2$ to estimate the standard error as $\sigma_{H,N}/\sqrt N$. For large $N$ and finite, positive $\operatorname{Var}(H_i)$, use $\widehat\theta_N\pm1.96\,\sigma_{H,N}/\sqrt N$ as an approximate 95% confidence interval.
+
+The estimator is unbiased, and independence gives $\operatorname{Var}(\widehat\theta_N)=\operatorname{Var}(H_i)/N$.
+:::
+
+**Integrating $e^{-x^2}$ on $[0,1]$.** With $X$ uniform on $[0,1]$, take $H_i=e^{-X_i^2}$ and average these values. Compare the estimates and confidence intervals with the exact integral $\sqrt\pi\,\operatorname{erf}(1)/2$.
+
+```{python}
+#| label: gaussian-integral
+rng=np.random.default_rng(490704)
+h4=np.exp(-rng.random(100_000)**2)
+exact4=sqrt(pi)*erf(1)/2
+ns4=[100,1000,10_000,100_000]
+rows4=[]
+for n in ns4:
+    rows4.append([n,*stats(h4[:n])])
+table(rows4,["N","Mean estimate","Sample SD","SE","95% lower","95% upper"])
+print(f"Exact integral: {exact4:.9f}")
+```
+
+```{python}
+#| label: fig-gaussian-integral
+#| echo: false
+#| fig-cap: "Running mean and 95% CI. The rate reference is drawn above the exact value."
+ns = np.unique(np.geomspace(30, 100_000, 350).astype(int))
+mean, sd, half = running(h4, ns)
+reference = exact4 + 1.96 * sd[-1] / np.sqrt(ns)
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.plot(ns, mean, color="#4C78A8", label="Sample mean")
+ax.fill_between(ns, mean-half, mean+half, color="#4C78A8", alpha=.25, label="95% CI")
+ax.axhline(exact4, color="#D1495B", ls="--", label="Exact")
+ax.plot(ns, reference, color="#F28E2B", ls="-.", label=r"$O(N^{-1/2})$")
+ax.set(xscale="log", xlabel="N", ylabel="Integral estimate")
+ax.legend()
+plt.show()
+```
+
+The CI width is $3.92\,\sigma_{H,N}/\sqrt N$. The reference line uses the final sample SD to show how the CI half-width scales with $N$.
+
+## Pricing a European call
+
+The same estimator can price a call in the Black–Scholes model. With $Z\sim N(0,1)$, simulate the terminal price $S_T$ and evaluate the discounted payoff $H(Z)$:
+$$
+S_T=S_0e^{(r-\sigma^2/2)T+\sigma\sqrt T Z},\qquad
+H(Z)=e^{-rT}(S_T-K)^+.
+$$
+
+::: {.callout-note title="Theorem: Black–Scholes price of a European call" icon="false"}
+Under the Black–Scholes model, the time-zero call price is
+$$
+C_0=S_0F_Z(d_1)-Ke^{-rT}F_Z(d_2),
+$$
+where $F_Z$ is the standard normal CDF and, with $\nu=\sigma\sqrt T$,
+$$
+d_2=\frac{\log(S_0/K)+(r-\sigma^2/2)T}{\nu},
+\qquad d_1=d_2+\nu.
+$$
+
+**Derivation.** Under the risk-neutral distribution above, $S_T>K$ exactly when $Z>-d_2$. Splitting the payoff into its stock and strike terms gives
+$$
+C_0=e^{-rT}\mathbb E[S_T\mathbf 1_{\{Z>-d_2\}}]
+    -Ke^{-rT}\Pr(Z>-d_2).
+$$
+By normal symmetry, $\Pr(Z>-d_2)=F_Z(d_2)$. For the stock term, completing the square in the standard normal density gives $e^{\nu z-\nu^2/2}f_Z(z)=f_Z(z-\nu)$. Hence
+$$
+\begin{aligned}
+e^{-rT}\mathbb E[S_T\mathbf 1_{\{Z>-d_2\}}]
+&=S_0\int_{-d_2}^{\infty}e^{\nu z-\nu^2/2}f_Z(z)\,dz\\
+&=S_0\int_{-d_1}^{\infty}f_Z(t)\,dt=S_0F_Z(d_1).
+\end{aligned}
+$$
+
+**Benchmark calculation.** With $(S_0,K,r,\sigma,T)=(95,100,0.01,0.4,1)$, we get $d_2\approx-0.303233$ and $d_1\approx0.096767$. Evaluating $95F_Z(d_1)-100e^{-0.01}F_Z(d_2)$ gives $C_0\approx13.455050$.
+:::
+
+The experiment compares the Monte Carlo estimates at $N=10{,}000$ and $100{,}000$ paths with this benchmark.
+
+```{python}
+#| label: crude-call-pricing
+s0,k,r,sigma,T=95.,100.,.01,.4,1.
+drift=(r-sigma**2/2)*T
+vol=sigma*sqrt(T)
+discount=exp(-r*T)
+def payoff(z):
+    st=s0*np.exp(drift+vol*np.asarray(z))
+    return discount*np.maximum(st-k,0)
+def Phi(t): return .5*(1+erf(t/sqrt(2)))
+d1=(log(s0/k)+(r+sigma**2/2)*T)/vol
+d2=d1-vol
+exact5=s0*Phi(d1)-k*discount*Phi(d2)
+rng=np.random.default_rng(490705)
+w5=payoff(rng.standard_normal(100_000))
+table([[n,*stats(w5[:n])] for n in [10_000,100_000]],
+      ["N","Price estimate","Payoff SD","SE","95% lower","95% upper"])
+print(f"Black–Scholes benchmark: {exact5:.6f}")
+```
+
+```{python}
+#| label: fig-crude-call-pricing
+#| echo: false
+#| fig-cap: "Running call-price estimate and 95% CI. The rate reference is drawn above the Black–Scholes benchmark."
+ns = np.unique(np.geomspace(100, 100_000, 350).astype(int))
+mean, sd, half = running(w5, ns)
+reference = exact5 + 1.96 * sd[-1] / np.sqrt(ns)
+fig, ax = plt.subplots(figsize=(9, 4))
+ax.plot(ns, mean, color="#4C78A8", label="Sample mean")
+ax.fill_between(ns, mean-half, mean+half, color="#4C78A8", alpha=.25, label="95% CI")
+ax.axhline(exact5, color="#D1495B", ls="--", label="Black–Scholes benchmark")
+ax.plot(ns, reference, color="#F28E2B", ls="-.", label=r"$O(N^{-1/2})$")
+ax.set(xscale="log", xlabel="N", ylabel="Call price estimate")
+ax.legend()
+plt.show()
+```
+
+The tenfold increase in paths divides the standard error by about $\sqrt{10}$. Reducing the standard error by a factor of ten using this estimator would take 100 times as many paths.
+
+## Antithetic variates
+
+::: {.callout-note title="Definitions: Covariance and correlation" icon="false"}
+The joint CDF $F_{X,Y}(x,y)=\Pr(X\le x,\,Y\le y)$ describes how $X$ and $Y$ are distributed together. For variables with finite second moments, define
+$$
+\operatorname{Cov}(X,Y)=\mathbb E[(X-\mu_X)(Y-\mu_Y)],
+\qquad
+\operatorname{Corr}(X,Y)=\frac{\operatorname{Cov}(X,Y)}{\sigma_X\sigma_Y}
+$$
+with correlation defined when $\sigma_X,\sigma_Y>0$. Correlation lies in $[-1,1]$ and measures the direction and strength of the linear relationship. In particular, $\operatorname{Cov}(X,X)=\sigma_X^2$.
+
+For paired observations $(X_i,Y_i)$, the sample covariance and sample correlation are
+$$
+C_N(X,Y)=\frac{1}{N-1}\sum_{i=1}^N(X_i-\mu_{X,N})(Y_i-\mu_{Y,N}),
+\qquad
+\rho_N(X,Y)=\frac{C_N(X,Y)}{\sigma_{X,N}\sigma_{Y,N}}
+$$
+when the sample standard deviations in the denominator are positive.
+:::
+
+::: {.callout-note title="Algorithm: Antithetic variates" icon="false"}
+To estimate $\theta=\mathbb E[h(X)]$:
+
+1. Generate $N$ independent pairs $(X_i,X_i')$. Give both members the same marginal distribution as $X$ and choose the pairing so that $h(X_i)$ and $h(X_i')$ are negatively correlated. For monotone $h$, common choices are $(U,1-U)$ for a uniform draw and $(Z,-Z)$ for a standard normal draw.
+2. Form $A_i=(h(X_i)+h(X_i'))/2$ and return $\widehat\theta_N=\mu_{A,N}$.
+3. Estimate the standard error as $\sigma_{A,N}/\sqrt N$ from the $N$ pair averages. An approximate 95% CI is $\widehat\theta_N\pm1.96\,\sigma_{A,N}/\sqrt N$.
+
+If $\operatorname{Var}(h(X))=\sigma_h^2$, each pair average has variance $\sigma_h^2(1+\rho)/2$, where $\rho$ is the within-pair correlation. At the same cost of $2N$ evaluations of $h$, the estimator variance is $1+\rho$ times that of crude Monte Carlo.
+:::
+
+**Pairing call payoffs.** Revisit the European call with 10,000 pairs $(Z_i,-Z_i)$. Normal symmetry gives $Z\stackrel d=-Z$. The call payoff $H(Z)$ is nondecreasing in $Z$, while $H(-Z)$ is nonincreasing, so their covariance is nonpositive. Use $A_i=(H(Z_i)+H(-Z_i))/2$ as the independent observations for the estimate and CI.
+
+```{python}
+#| label: antithetic-call-pricing
+rng=np.random.default_rng(490706)
+z6=rng.standard_normal(10_000)
+pplus,pminus=payoff(z6),payoff(-z6)
+pairs=(pplus+pminus)/2
+rng_fair=np.random.default_rng(49070620)
+crude20k=payoff(rng_fair.standard_normal(20_000))
+comparisons=[("Crude, 10,000 paths from the baseline",w5[:10_000]),
+             ("Crude, same 10,000 base Z",pplus),
+             ("Antithetic, 10,000 pairs",pairs),
+             ("Crude, 20,000 independent paths",crude20k)]
+table([[name,len(v),*stats(v)] for name,v in comparisons],
+      ["Method","Independent units","Price","Sample SD","SE","95% lower","95% upper"])
+print(f"Within-pair payoff correlation: {np.corrcoef(pplus,pminus)[0,1]:.6f}")
+```
+
+Each pair costs two payoff evaluations. The figure compares both methods at the same number of evaluations, using the CI widths to show the difference in standard error.
+
+```{python}
+#| label: fig-antithetic-call-pricing
+#| echo: false
+#| fig-cap: "Antithetic versus crude MC at equal payoff cost."
+npair=np.unique(np.geomspace(50,10_000,250).astype(int))
+cost=2*npair
+am,_,ah=running(pairs,npair)
+cm,_,ch=running(crude20k,cost)
+fig,ax=plt.subplots(figsize=(9,4))
+ax.plot(cost,am,color="#4C78A8",label="Antithetic")
+ax.fill_between(cost,am-ah,am+ah,color="#4C78A8",alpha=.18)
+ax.plot(cost,cm,color="#F28E2B",label="Independent crude")
+ax.fill_between(cost,cm-ch,cm+ch,color="#F28E2B",alpha=.16)
+ax.axhline(exact5,color="#D1495B",ls="--",label="Benchmark")
+ax.set(xscale="log",xlabel="Payoff evaluations",ylabel="Price and 95% CI")
+ax.legend(); plt.show()
+```
+
+## Control variates
+
+::: {.callout-note title="Algorithm: Control variates" icon="false"}
+To estimate $\theta=\mathbb E[H]$, choose a control $Y$ computed from the same simulation as $H$, with known mean $\mu_Y$ and strong correlation with $H$.
+
+1. Generate independent pairs $(H_i,Y_i)$.
+2. Choose the coefficient $c$. The variance-minimizing choice is $c^*=-\operatorname{Cov}(H,Y)/\operatorname{Var}(Y)$ for $\operatorname{Var}(Y)>0$. When these moments are unknown, use $\widehat c=-C_N(H,Y)/\sigma_{Y,N}^2$ if $\sigma_{Y,N}^2>0$.
+3. Form $H_i^*=H_i+c(Y_i-\mu_Y)$ and return $\widehat\theta_N=\mu_{H^*,N}$. Estimate its standard error as $\sigma_{H^*,N}/\sqrt N$.
+
+For fixed $c$, the correction has mean zero. At $c=c^*$, the variance of each adjusted value is $\operatorname{Var}(H)(1-\rho^2)$, where $\rho=\operatorname{Corr}(H,Y)$.
+:::
+
+**An exponential moment.** To estimate $\mathbb E[X^{0.9}]$ for $X\sim\mathrm{Exp}(1)$, use $Y=X$ as the control. Its mean is $1$, and its values move closely with $X^{0.9}$. From each inverse transform draw $X_i=-\ln(1-U_i)$, compute both $H_i=X_i^{0.9}$ and $Y_i=X_i$.
+
+```{python}
+#| label: exponential-control-variate
+rng=np.random.default_rng(490707)
+x7=-np.log1p(-rng.random(10_000))
+h7=x7**.9
+chat=-np.cov(h7,x7,ddof=1)[0,1]/np.var(x7,ddof=1)
+adjusted7=h7+chat*(x7-1)
+exact7=gamma(1.9)
+table([["Crude",*stats(h7)[:3]],["Control variate",*stats(adjusted7)[:3]]],
+      ["Method","Estimate","Sample SD","SE"])
+print(f"Sample c: {chat:.6f}; analytic c*: {-0.9*exact7:.6f}")
+print(f"Exact target Γ(1.9): {exact7:.6f}")
+```
+
+```{python}
+#| label: fig-exponential-control-variate
+#| echo: false
+#| fig-cap: "Crude versus control-variate estimates and 95% CIs."
+ns=np.unique(np.geomspace(50,10_000,250).astype(int))
+cm,_,ch=running(h7,ns)
+vm,_,vh=running(adjusted7,ns)
+fig,ax=plt.subplots(figsize=(9,4))
+ax.plot(ns,cm,color="#F28E2B",label="Crude")
+ax.fill_between(ns,cm-ch,cm+ch,color="#F28E2B",alpha=.15)
+ax.plot(ns,vm,color="#4C78A8",label="Control variate")
+ax.fill_between(ns,vm-vh,vm+vh,color="#4C78A8",alpha=.2)
+ax.axhline(exact7,color="#D1495B",ls="--",label="Exact")
+ax.set(xscale="log",xlabel="N",ylabel="Estimate and 95% CI")
+ax.legend(); plt.show()
+```
+
+The exact moment is $\Gamma(1.9)$ and the optimal coefficient is $-0.9\Gamma(1.9)$. The plot fits $\widehat c$ on the full sample and uses that same coefficient at every displayed $N$. Fitting the coefficient on the estimation sample can introduce finite-sample bias.
+
+## Importance sampling
+
+::: {.callout-note title="Algorithm: Importance sampling" icon="false"}
+To estimate $\theta=\mathbb E[h(X)]$ for a target $X$ with density $f_X$, choose a proposal $Y$ with density $f_Y$. Require $f_Y$ to be positive almost everywhere that $h(x)f_X(x)\ne 0$. Put more proposal mass where $|h(x)|f_X(x)$ is large.
+
+1. Draw independent $Y_1,\ldots,Y_N$ from $f_Y$.
+2. Compute the weighted values $W_i=h(Y_i)f_X(Y_i)/f_Y(Y_i)$.
+3. Return $\widehat\theta_N=\mu_{W,N}$. If $W_i$ has a finite second moment, use $\sigma_{W,N}/\sqrt N$ as the estimated standard error.
+
+The weight accounts for the change of sampling density:
+$$
+\mathbb E\!\left[h(Y)\frac{f_X(Y)}{f_Y(Y)}\right]
+=\int h(y)f_X(y)\,dy=\theta.
+$$
+:::
+
+**A rare normal tail event.** To estimate $\Pr(Z>4)$ for $Z\sim N(0,1)$, move the proposal mean to the threshold. About half the draws from $Y\sim N(4,1)$ exceed $4$. Since $f_Y(y)=f_Z(y-4)$, the likelihood ratio is $f_Z(Y)/f_Y(Y)=e^{-4Y+8}$, giving $W=\mathbf{1}_{\{Y>4\}}e^{-4Y+8}$. Both methods use 100,000 draws.
+
+```{python}
+rng = np.random.default_rng(490708)
+n8 = 100_000
+z8 = rng.standard_normal(n8)
+y8 = rng.normal(loc=4, scale=1, size=n8)
+crude8 = (z8 > 4).astype(float)
+weights8 = (y8 > 4) * np.exp(-4*y8 + 8)
+exact8 = 0.5 * erfc(4 / sqrt(2))
+
+rows8 = []
+for name, values in [("Crude", crude8), ("Importance sampling", weights8)]:
+    estimate, _, se, _, _ = stats(values)
+    rows8.append([name, np.count_nonzero(values), f"{estimate:.3e}", f"{se:.3e}"])
+table(rows8, ["Method", "Draws above 4", "Estimate", "SE"])
+print(f"Exact tail probability: {exact8:.8g}")
+```
+
+```{python}
+#| label: fig-normal-tail
+#| echo: false
+#| fig-cap: "The top panel compares the running estimates at equal sample sizes. The bottom panel zooms in on the importance sampling estimate, 95% CI, and exact probability for N from 50,000 to 100,000."
+ns8 = np.unique(np.geomspace(100, n8, 350).astype(int))
+crude_mean, _, _ = running(crude8, ns8)
+is_mean, _, is_half = running(weights8, ns8)
+zoom_sizes = np.linspace(50_000, n8, 250, dtype=int)
+zoom_mean, _, zoom_half = running(weights8, zoom_sizes)
+
+fig, (overview, zoom) = plt.subplots(2, 1, figsize=(9, 7), layout="constrained")
+overview.plot(ns8, crude_mean, color="#F28E2B", label="Crude")
+for ax, sizes, mean, half in [(overview, ns8, is_mean, is_half),
+                               (zoom, zoom_sizes, zoom_mean, zoom_half)]:
+    ax.plot(sizes, mean, color="#4C78A8", label="Importance sampling")
+    ax.fill_between(sizes, mean-half, mean+half,
+                    color="#4C78A8", alpha=.2, label="Importance sampling 95% CI")
+    ax.axhline(exact8, color="#D1495B", ls="--", label="Exact")
+    ax.set(xlabel="N", ylabel=r"Estimate of $\Pr(Z>4)$")
+    ax.ticklabel_format(axis="y", style="sci", scilimits=(0, 0), useOffset=False)
+    ax.legend(loc="upper right")
+
+overview.set(title="Full comparison", xscale="log")
+zoom.set(title="Importance sampling at large N", xlim=(zoom_sizes[0], zoom_sizes[-1]))
+plt.show()
+```
+
+The shifted proposal produces more tail observations and gives a smaller standard error in this experiment. With only a few crude hits, a normal approximation for the crude CI can be poor.
